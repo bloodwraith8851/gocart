@@ -4,41 +4,31 @@
 
 ```mermaid
 flowchart TD
-    subgraph App Router
-        APPLAYOUT[app/layout.jsx]
-        STOREPROVIDER[app/StoreProvider.js]
-        PUBLICLAYOUT[app/(public)/layout.jsx]
-        ADMINLAYOUT[app/admin/layout.jsx]
-        STORELAYOUT[app/store/layout.jsx]
-        PUBLICPAGES[app/(public)/*]
-        ADMINPAGES[app/admin/*]
-        STOREPAGES[app/store/*]
-    end
-    subgraph Components
-        NAVBAR[components/Navbar.jsx]
-        FOOTER[components/Footer.jsx]
-        PRODUCTCARD[components/ProductCard.jsx]
-        ORDERITEM[components/OrderItem.jsx]
-        ADDRESSMODAL[components/AddressModal.jsx]
-        ADMINCOMP[components/admin/*]
-        STORECOMP[components/store/*]
-    end
-    subgraph State
-        STORE[lib/store.js]
-        CARTSLICE[lib/features/cart/cartSlice.js]
-        PRODUCTSLICE[lib/features/product/productSlice.js]
-        ADDRESSSLICE[lib/features/address/addressSlice.js]
-        RATINGS[lib/features/rating/ratingSlice.js]
-    end
-    subgraph Auth
-        CLERK[ClerkProvider]
-        MIDDLEWARE[middleware.ts]
-    end
-    subgraph Data
-        PRISMA[lib/prisma.js]
-        SCHEMA[prisma/schema.prisma]
-        ASSETS[assets/assets.js]
-    end
+    APPLAYOUT["app/layout.jsx"]
+    STOREPROVIDER["app/StoreProvider.js"]
+    PUBLICLAYOUT["app/(public)/layout.jsx"]
+    ADMINLAYOUT["app/admin/layout.jsx"]
+    STORELAYOUT["app/store/layout.jsx"]
+    PUBLICPAGES["app/(public)/*"]
+    ADMINPAGES["app/admin/*"]
+    STOREPAGES["app/store/*"]
+    NAVBAR["components/Navbar.jsx"]
+    FOOTER["components/Footer.jsx"]
+    PRODUCTCARD["components/ProductCard.jsx"]
+    ORDERITEM["components/OrderItem.jsx"]
+    ADDRESSMODAL["components/AddressModal.jsx"]
+    ADMINCOMP["components/admin/*"]
+    STORECOMP["components/store/*"]
+    STORE["lib/store.js"]
+    CARTSLICE["lib/features/cart/cartSlice.js"]
+    PRODUCTSLICE["lib/features/product/productSlice.js"]
+    ADDRESSSLICE["lib/features/address/addressSlice.js"]
+    RATINGS["lib/features/rating/ratingSlice.js"]
+    CLERK["ClerkProvider"]
+    MIDDLEWARE["middleware.ts"]
+    PRISMA["lib/prisma.js"]
+    SCHEMA["prisma/schema.prisma"]
+    ASSETS["assets/assets.js"]
     APPLAYOUT --> CLERK
     CLERK --> STOREPROVIDER
     STOREPROVIDER --> STORE
@@ -56,32 +46,31 @@ flowchart TD
     ADMINLAYOUT --> ADMINPAGES
     STORELAYOUT --> STORECOMP
     STORELAYOUT --> STOREPAGES
-    PUBLICPAGES -->|import/use| PRODUCTCARD
-    PUBLICPAGES -->|import/use| ORDERITEM
-    PUBLICPAGES -->|import/use| ADDRESSMODAL
-    ADMINPAGES -->|import/use| ADMINCOMP
-    STOREPAGES -->|import/use| STORECOMP
-    NAVBAR -->|router.push| PUBLICPAGES
-    NAVBAR -->|router.push| app/(public)/shop/page.jsx
-    PUBLICPAGES -->|useSelector| CARTSLICE
-    PUBLICPAGES -->|useSelector| PRODUCTSLICE
-    PUBLICPAGES -->|useSelector| ADDRESSSLICE
-    PUBLICPAGES -->|useSelector| RATINGS
-    ADMINPAGES -->|useSelector| PRODUCTSLICE
-    STOREPAGES -->|useSelector| PRODUCTSLICE
-    STOREPAGES -->|useSelector| CARTSLICE
-    STOREPAGES -->|fetch| ASSETS
-    STOREPAGES -->|fetch| PRISMA
-    ADMINPAGES -->|fetch| PRISMA
+    PUBLICPAGES -->|"import/use"| PRODUCTCARD
+    PUBLICPAGES -->|"import/use"| ORDERITEM
+    PUBLICPAGES -->|"import/use"| ADDRESSMODAL
+    ADMINPAGES -->|"import/use"| ADMINCOMP
+    STOREPAGES -->|"import/use"| STORECOMP
+    NAVBAR -->|"router.push"| PUBLICPAGES
+    NAVBAR -->|"router.push"| PUBLICPAGES
+    PUBLICPAGES -->|"useSelector"| CARTSLICE
+    PUBLICPAGES -->|"useSelector"| PRODUCTSLICE
+    PUBLICPAGES -->|"useSelector"| ADDRESSSLICE
+    PUBLICPAGES -->|"useSelector"| RATINGS
+    ADMINPAGES -->|"useSelector"| PRODUCTSLICE
+    STOREPAGES -->|"useSelector"| PRODUCTSLICE
+    STOREPAGES -->|"useSelector"| CARTSLICE
+    STOREPAGES -->|"fetch"| ASSETS
+    STOREPAGES -->|"fetch"| PRISMA
+    ADMINPAGES -->|"fetch"| PRISMA
     MIDDLEWARE --> CLERK
     PRISMA --> SCHEMA
-    STOREPROVIDER -->|Provider| PUBLICPAGES
-    STOREPROVIDER -->|Provider| ADMINPAGES
-    STOREPROVIDER -->|Provider| STOREPAGES
-    PUBLICPAGES -->|router.push| app/(public)/orders/page.jsx
-    PUBLICPAGES -->|router.push| app/(public)/shop/page.jsx
-    STOREPAGES -->|router.push| app/store/orders/page.jsx
-    ADMINPAGES -->|router.push| app/admin/stores/page.jsx
+    STOREPROVIDER -->|"Provider"| PUBLICPAGES
+    STOREPROVIDER -->|"Provider"| ADMINPAGES
+    STOREPROVIDER -->|"Provider"| STOREPAGES
+    PUBLICPAGES -->|"router.push"| PUBLICPAGES
+    STOREPAGES -->|"router.push"| STOREPAGES
+    ADMINPAGES -->|"router.push"| ADMINPAGES
 ```
 *Figure: Major file/module connections, Redux state, Clerk auth, and navigation/data flow. Arrows show imports, usage, and data/API flow between files.*
 
