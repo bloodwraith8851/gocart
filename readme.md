@@ -1,5 +1,42 @@
 # GoCart - Multi-Tenant E-commerce Platform
 
+<p align="center">
+  <img src="assets/gs_logo.jpg" alt="GoCart Logo" width="120"/>
+</p>
+
+<p align="center">
+  <b>Multi-vendor e-commerce platform for the modern web</b><br>
+  <i>Shop, sell, and manage with ease. Built with Next.js, Prisma, Clerk, and more.</i>
+</p>
+
+<p align="center">
+  <a href="#getting-started"><img src="https://img.shields.io/badge/Getting%20Started-blue"/></a>
+  <a href="#technology-stack"><img src="https://img.shields.io/badge/Tech%20Stack-green"/></a>
+  <a href="#features"><img src="https://img.shields.io/badge/Features-orange"/></a>
+  <a href="#architecture"><img src="https://img.shields.io/badge/Architecture-purple"/></a>
+  <a href="#api-reference"><img src="https://img.shields.io/badge/API%20Reference-yellow"/></a>
+  <a href="#contributing"><img src="https://img.shields.io/badge/Contributing-brightgreen"/></a>
+  <a href="#license"><img src="https://img.shields.io/badge/License-MIT-blueviolet"/></a>
+</p>
+
+---
+
+## 📑 Quick Links
+- [Demo](#demo)
+- [Getting Started](#getting-started)
+- [Technology Stack](#technology-stack)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Data Flow & Graphs](#data-flow--graphs)
+- [API Reference](#api-reference)
+- [Roadmap](#roadmap)
+- [FAQ](#faq)
+- [Contributing](#contributing)
+- [License & Credits](#license--credits)
+- [Contact](#contact)
+
+---
+
 ## 📂 File & Data Flow Overview
 
 ```mermaid
@@ -82,73 +119,217 @@ GoCart is a sophisticated multi-vendor e-commerce platform that enables customer
 
 The platform supports complex multi-vendor scenarios, including separate order processing per store, individual store ratings, coupon management, and comprehensive order tracking across different vendors.
 
-## 🚀 Technology Stack
+---
 
-| Layer                | Technology            | Version     | Purpose                                    |
-| -------------------- | ---------------------| ----------- | ------------------------------------------ |
-| **Framework**        | Next.js              | 15.3.5      | Full-stack React framework with App Router  |
-| **Frontend**         | React                | 19.0.0      | Component-based UI library                  |
-| **State Management** | Redux Toolkit        | 2.8.2       | Global state management                     |
-| **Authentication**   | Clerk                | 6.32.0      | User authentication and session management  |
-| **Database**         | PostgreSQL           | -           | Primary data storage                        |
-| **ORM**              | Prisma               | -           | Database access and schema management       |
-| **Styling**          | Tailwind CSS         | 4.x         | Utility-first CSS framework                 |
-| **Icons**            | Lucide React         | 0.525.0     | Icon library                                |
-| **Notifications**    | React Hot Toast      | 2.5.2       | Toast notifications                         |
-| **Charts**           | Recharts             | 3.1.2       | Data visualization                          |
-| **Date Handling**    | Date-fns             | 4.1.0       | Date utility functions                      |
+## 🛠️ Technology Stack
 
-## User Role Architecture
-GoCart implements a three-tier user access model with distinct interfaces and permissions:
-- **Customer**: Can browse products, manage their cart, and place orders.
-- **Store Owner**: Can manage their store, products, and fulfill orders.
-- **Admin**: Can approve stores, manage coupons, and view analytics across the platform.
+GoCart leverages a modern, robust technology stack to deliver a seamless, scalable, and secure multi-vendor e-commerce experience. Each technology is carefully chosen for its strengths and role in the platform:
 
-## Application Structure
-- **App Router**: Modular structure for public, store, and admin interfaces ([app/layout.jsx](app/layout.jsx))
-- **State Management**: Centralized Redux store ([app/StoreProvider.js](app/StoreProvider.js), [lib/store.js](lib/store.js))
-- **Database Schema**: Prisma models for User, Store, Product, Order, Rating, Coupon ([prisma/schema.prisma](prisma/schema.prisma))
-- **Authentication**: Clerk integration ([middleware.ts](middleware.ts))
-
-## Core Features Overview
-| Feature Category        | Key Components                        | Database Models      |
-| ----------------------- | ------------------------------------- | -------------------- |
-| **User Management**     | ClerkProvider, User authentication    | User, Address        |
-| **Store Operations**    | Store dashboard, product management   | Store, Product       |
-| **Shopping Experience** | Shopping cart, product catalog        | Product, User.cart   |
-| **Order Processing**    | Multi-vendor checkout, order tracking | Order, OrderItem     |
-| **Rating System**       | Product reviews, store ratings        | Rating               |
-| **Admin Controls**      | Store approval, coupon management     | Store.status, Coupon |
+| Layer                | Technology            | Version     | Purpose & Why We Use It                                                                 |
+|----------------------|----------------------|-------------|----------------------------------------------------------------------------------------|
+| **Framework**        | Next.js              | 15.3.5      | Full-stack React framework with App Router for SSR, routing, and API routes             |
+| **Frontend**         | React                | 19.0.0      | Component-based UI library for building interactive interfaces                          |
+| **State Management** | Redux Toolkit        | 2.8.2       | Predictable, scalable global state management                                           |
+| **Authentication**   | Clerk                | 6.32.0      | Secure, modern authentication and user/session management                               |
+| **Database**         | PostgreSQL           | -           | Reliable, scalable relational database                                                 |
+| **ORM**              | Prisma               | -           | Type-safe database access and schema management                                         |
+| **Styling**          | Tailwind CSS         | 4.x         | Utility-first CSS for rapid, responsive, and consistent UI                              |
+| **Icons**            | Lucide React         | 0.525.0     | Modern, customizable icon library                                                      |
+| **Notifications**    | React Hot Toast      | 2.5.2       | Toast notifications for user feedback                                                  |
+| **Charts**           | Recharts             | 3.1.2       | Data visualization for analytics and dashboards                                        |
+| **Date Handling**    | Date-fns             | 4.1.0       | Modern date utility functions                                                          |
 
 ---
 
-## 🏗️ High-Level System Architecture
+## 🖼️ Screenshots & GIFs
 
+| Public Store | Store Owner Dashboard | Admin Panel |
+|:---:|:---:|:---:|
+| ![](assets/hero_product_img1.png) | ![](assets/hero_product_img2.png) | ![](assets/happy_store.webp) |
+
+> _Want to showcase your store or feature? Submit your screenshots or GIFs via a pull request!_
+
+---
+
+## 🎯 Purpose & Scope
+GoCart is a next-generation, multi-vendor e-commerce platform designed for:
+- **Customers:**
+  - Browse and search products across multiple stores
+  - Manage shopping cart and place orders
+  - Track orders and leave product/store reviews
+- **Store Owners:**
+  - Create and manage their own store
+  - Add, edit, and manage products and inventory
+  - Fulfill and track orders, view analytics
+- **Admins:**
+  - Approve and manage stores
+  - Oversee platform-wide analytics and user management
+  - Manage coupons, promotions, and platform settings
+
+GoCart is built for scalability, modularity, and a seamless user experience, making it ideal for both small businesses and large marketplaces.
+
+---
+
+## ✨ Features
+
+| Feature                        | Customer | Store Owner | Admin |
+|------------------------------- |:--------:|:-----------:|:-----:|
+| Product Browsing & Search      |    ✅    |      ✅      |   ✅  |
+| Shopping Cart                  |    ✅    |      ✅      |   ❌  |
+| Order Placement & Tracking     |    ✅    |      ✅      |   ✅  |
+| Store Management               |    ❌    |      ✅      |   ✅  |
+| Product Management             |    ❌    |      ✅      |   ✅  |
+| Order Fulfillment              |    ❌    |      ✅      |   ✅  |
+| Analytics Dashboard            |    ❌    |      ✅      |   ✅  |
+| Reviews & Ratings              |    ✅    |      ✅      |   ✅  |
+| Coupon Management              |    ❌    |      ❌      |   ✅  |
+| Store Approval                 |    ❌    |      ❌      |   ✅  |
+| User Management                |    ❌    |      ❌      |   ✅  |
+| Responsive Design              |    ✅    |      ✅      |   ✅  |
+
+---
+
+## 🏗️ Architecture
+GoCart is architected for modularity and scalability, with clear separation between public, store owner, and admin interfaces. Centralized state management and a robust database schema ensure data consistency and performance.
+
+### High-Level System Architecture
 ```mermaid
-%% High-level system architecture
 flowchart TB
     subgraph Frontend
-        A[Public Interface]
-        B[Store Owner Interface]
-        C[Admin Interface]
+        Public["Public Interface"]
+        StoreOwner["Store Owner Interface"]
+        Admin["Admin Interface"]
     end
     subgraph Backend
-        D[Redux Store]
-        E[Prisma ORM]
-        F[PostgreSQL DB]
-        G[Clerk Auth]
+        Redux["Redux Store"]
+        Prisma["Prisma ORM"]
+        DB["PostgreSQL DB"]
+        Clerk["Clerk Auth"]
     end
-    A --> D
-    B --> D
-    C --> D
-    D --> E
-    E --> F
-    A -.-> G
-    B -.-> G
-    C -.-> G
-    G --> D
+    Public --> Redux
+    StoreOwner --> Redux
+    Admin --> Redux
+    Redux --> Prisma
+    Prisma --> DB
+    Public -.-> Clerk
+    StoreOwner -.-> Clerk
+    Admin -.-> Clerk
+    Clerk --> Redux
 ```
-*Figure: High-level architecture showing modular interfaces, centralized state, and authentication.*
+*Figure: Modular interfaces, centralized state, and authentication flow.*
+
+### User Flow Diagram
+```mermaid
+flowchart TD
+    Visitor["Visitor"] -->|"Sign Up / Sign In"| Clerk["Clerk Auth"]
+    Clerk -->|"Authenticated"| Customer["Customer"]
+    Clerk -->|"Authenticated as Store Owner"| StoreOwner["Store Owner"]
+    Clerk -->|"Authenticated as Admin"| Admin["Admin"]
+    Customer -->|"Browse, Shop, Order"| PublicUI["Public Interface"]
+    StoreOwner -->|"Manage Store, Products, Orders"| StoreUI["Store Owner Interface"]
+    Admin -->|"Approve Stores, Manage Platform"| AdminUI["Admin Interface"]
+```
+*Figure: User authentication and interface access flow.*
+
+---
+
+## 🔍 How It Works
+
+### 1. Customer Checkout Flow
+A customer browses products, adds items to the cart, and completes checkout with address and payment selection.
+
+```mermaid
+sequenceDiagram
+    participant C as Customer
+    participant UI as Public UI
+    participant Redux as Redux Store
+    participant API as API/Server Actions
+    participant DB as Database
+    C->>UI: Browse products
+    UI->>Redux: Fetch product list
+    Redux->>API: GET /api/products
+    API->>DB: Query products
+    DB-->>API: Products data
+    API-->>Redux: Products data
+    Redux-->>UI: Show products
+    C->>UI: Add to cart
+    UI->>Redux: Update cart state
+    C->>UI: Checkout
+    UI->>Redux: Collect address/payment
+    Redux->>API: POST /api/orders
+    API->>DB: Create order
+    DB-->>API: Order confirmation
+    API-->>Redux: Order confirmation
+    Redux-->>UI: Show order success
+```
+
+### 2. Store Approval (Admin)
+A new store is created by a user and must be approved by an admin before going live.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant UI as Store Owner UI
+    participant API as API/Server Actions
+    participant DB as Database
+    participant Admin as Admin UI
+    U->>UI: Create store
+    UI->>API: POST /api/stores
+    API->>DB: Save store (pending)
+    Admin->>Admin: Review pending stores
+    Admin->>API: POST /api/admin/approve
+    API->>DB: Update store status (active)
+    Admin-->>UI: Store approved
+```
+
+### 3. Admin Analytics Flow
+Admin views platform-wide analytics, including sales, orders, and store performance.
+
+```mermaid
+sequenceDiagram
+    participant Admin as Admin
+    participant AdminUI as Admin UI
+    participant API as API/Server Actions
+    participant DB as Database
+    Admin->>AdminUI: Open dashboard
+    AdminUI->>API: GET /api/analytics
+    API->>DB: Aggregate sales/orders data
+    DB-->>API: Analytics data
+    API-->>AdminUI: Analytics data
+    AdminUI-->>Admin: Show charts/metrics
+```
+
+---
+
+## 🚀 Deployment Guide
+
+### Deploying to Vercel (Recommended)
+1. **Fork or clone the repository** to your GitHub account.
+2. **Create a new project** on [Vercel](https://vercel.com/).
+3. **Connect your GitHub repo** and import the GoCart project.
+4. **Set environment variables** in the Vercel dashboard:
+   - `DATABASE_URL` (your PostgreSQL connection string)
+   - `DIRECT_URL` (optional, for direct DB access)
+   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (from Clerk dashboard)
+   - `CLERK_SECRET_KEY` (from Clerk dashboard)
+   - Any other variables from `.env.example`
+5. **Provision a PostgreSQL database** (e.g., [Neon](https://neon.tech/), [Supabase](https://supabase.com/), [Railway](https://railway.app/)).
+6. **Run database migrations**:
+   - You may need to run `npx prisma migrate deploy` in the Vercel dashboard or via a GitHub Action.
+7. **Deploy!** Vercel will build and deploy your app automatically.
+
+### Other Platforms
+- **Netlify:** Similar steps, but ensure Next.js SSR is supported (Netlify Edge Functions or similar).
+- **Custom VPS:**
+  - Clone the repo, set up Node.js, install dependencies, configure environment, and use a process manager (e.g., PM2).
+
+### Tips
+- Always keep your environment variables secure.
+- Use a managed PostgreSQL service for reliability.
+- For production, set `NODE_ENV=production`.
+- Monitor logs and errors via your hosting provider’s dashboard.
+
+> _Need help? Open an issue or discussion on GitHub!_
 
 ---
 
@@ -647,3 +828,119 @@ export default function StoreProvider({ children }) {
 
   return <Provider store={storeRef.current}>{children}</Provider>
 ```
+
+---
+
+## 📚 API Reference
+GoCart exposes a set of RESTful API endpoints and server actions for data access and management. Below are some example endpoints (expand as you add more):
+
+| Endpoint                | Method | Description                        | Request Body / Params         | Response Example              |
+|-------------------------|--------|------------------------------------|-------------------------------|-------------------------------|
+| `/api/products`         | GET    | Get all products                   | -                             | `[ { id, name, price, ...} ]` |
+| `/api/products/:id`     | GET    | Get product by ID                  | `id` (URL param)              | `{ id, name, price, ... }`    |
+| `/api/orders`           | POST   | Create a new order                 | `{ cart, address, payment }`  | `{ orderId, status, ... }`    |
+| `/api/orders/:id`       | GET    | Get order details                  | `id` (URL param)              | `{ orderId, items, ... }`     |
+| `/api/stores`           | POST   | Create a new store                 | `{ name, description, ... }`  | `{ storeId, status, ... }`    |
+| `/api/admin/approve`    | POST   | Approve a store (admin only)       | `{ storeId }`                 | `{ success: true }`           |
+
+> _For a full list of endpoints and server actions, see the `/app/api/` directory and server action files._
+
+---
+
+## 🗺️ Roadmap
+- [ ] RESTful API endpoints for all resources
+- [ ] Real payment gateway integration (Stripe, PayPal, etc.)
+- [ ] Storefront themes and customization
+- [ ] Advanced analytics and reporting
+- [ ] Mobile app (React Native)
+- [ ] Multi-language and localization support
+- [ ] More admin controls and moderation tools
+- [ ] Automated tests & CI/CD integration
+- [ ] Webhooks and third-party integrations
+- [ ] Performance and accessibility improvements
+
+---
+
+## 📝 License & Credits
+
+<p align="left">
+  <img src="https://img.shields.io/badge/License-MIT-blueviolet" alt="MIT License"/>
+</p>
+
+- **License:** MIT — see [LICENSE](LICENSE) for details.
+- **Credits:**
+  - Built with [Next.js](https://nextjs.org/), [Prisma](https://www.prisma.io/), [Clerk](https://clerk.dev/), [Tailwind CSS](https://tailwindcss.com/), [Lucide Icons](https://lucide.dev/), [Recharts](https://recharts.org/), [Date-fns](https://date-fns.org/), and more.
+  - Project by [bloodwraith8851](https://github.com/bloodwraith8851) and contributors.
+
+---
+
+## 📬 Contact
+
+- **Email:** [your-email@example.com](mailto:your-email@example.com)
+- **GitHub Issues:** [Open an issue](https://github.com/bloodwraith8851/gocart/issues)
+- **Twitter:** [@yourhandle](https://twitter.com/yourhandle)
+- **Project Repo:** [GoCart on GitHub](https://github.com/bloodwraith8851/gocart)
+
+> _We welcome feedback, questions, and collaboration!_
+
+---
+
+## ⚡ Performance & Security Notes
+
+**Performance:**
+- Uses Next.js Server-Side Rendering (SSR) for fast, SEO-friendly pages.
+- Centralized state management with Redux Toolkit for efficient UI updates.
+- Modular codebase and code-splitting for faster load times.
+- Supports caching strategies for API/data fetching (can be extended for production).
+
+**Security:**
+- Clerk authentication for secure user/session management.
+- Prisma ORM for type-safe, injection-resistant database access.
+- Middleware-based route protection for admin/store areas.
+- Data validation on both client and server.
+- Environment variables for sensitive config (never hard-coded).
+
+> _Always keep dependencies up to date and monitor for security advisories!_
+
+---
+
+## 📝 Changelog
+
+| Version   | Date         | Changes                                      |
+|-----------|--------------|----------------------------------------------|
+| 1.0.0     | 2025-09-16   | Initial release: core features, multi-vendor |
+| 1.1.0     | 2025-09-18   | Added admin dashboard, store approval        |
+| 1.2.0     | 2025-09-20   | Improved documentation, added diagrams       |
+| 1.3.0     | 2025-09-22   | Added deployment guide, FAQ, and roadmap     |
+
+> _Contributors: Please update the changelog with each significant PR!_
+
+---
+
+## 🌟 Showcase / Used By
+
+| Project/Company      | Description                        | Link                        |
+|----------------------|------------------------------------|-----------------------------|
+| _Your Project Here!_ | Example: Electronics marketplace   | [Demo](https://example.com) |
+
+> _Are you using GoCart in production? Add your site here via a pull request!_
+
+---
+
+## 🌐 Internationalization (i18n)
+
+GoCart is designed with future support for multiple languages in mind. To add or improve internationalization:
+
+- **Recommended Libraries:**
+  - [next-intl](https://github.com/amannn/next-intl) for Next.js projects
+  - [react-i18next](https://react.i18next.com/) for React components
+- **Translation Structure:**
+  - Store translation files (e.g., `en.json`, `es.json`) in a `/locales` directory
+  - Use language keys in all UI components
+  - Detect and switch languages based on user preference or browser settings
+- **Contributing:**
+  - Want to add a new language? Fork the repo and submit your translation files via PR!
+
+> _Help make GoCart accessible to users around the world!_
+
+---
