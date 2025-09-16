@@ -1,27 +1,50 @@
-# GoCart - Multi-Tenant E-commerce Platform [1](#0-0) 
+# GoCart - Multi-Tenant E-commerce Platform
 
-A modern, full-stack e-commerce platform built with Next.js that enables users to create their own stores, manage products, and facilitate online transactions. GoCart features a multi-tenant architecture supporting public shopping, store management, and administrative oversight.
+## Purpose and Scope
+GoCart is a sophisticated multi-vendor e-commerce platform that enables customers to shop from multiple stores, store owners to manage their own products and orders, and admins to oversee the entire marketplace. The system provides three distinct user experiences:
+- **Public Interface**: Customer browsing, shopping cart management, and order placement
+- **Store Owner Interface**: Product management, inventory control, and order fulfillment
+- **Admin Interface**: Platform management, store approval, and system-wide analytics
+
+The platform supports complex multi-vendor scenarios, including separate order processing per store, individual store ratings, coupon management, and comprehensive order tracking across different vendors.
 
 ## 🚀 Technology Stack
 
-### Frontend
-- **Next.js 14** - React framework with App Router
-- **React 18** - Component-based UI library
-- **Tailwind CSS** - Utility-first CSS framework
-- **Lucide React** - Modern icon library [2](#0-1) 
+| Layer                | Technology            | Version     | Purpose                                    |
+| -------------------- | ---------------------| ----------- | ------------------------------------------ |
+| **Framework**        | Next.js              | 15.3.5      | Full-stack React framework with App Router  |
+| **Frontend**         | React                | 19.0.0      | Component-based UI library                  |
+| **State Management** | Redux Toolkit        | 2.8.2       | Global state management                     |
+| **Authentication**   | Clerk                | 6.32.0      | User authentication and session management  |
+| **Database**         | PostgreSQL           | -           | Primary data storage                        |
+| **ORM**              | Prisma               | -           | Database access and schema management       |
+| **Styling**          | Tailwind CSS         | 4.x         | Utility-first CSS framework                 |
+| **Icons**            | Lucide React         | 0.525.0     | Icon library                                |
+| **Notifications**    | React Hot Toast      | 2.5.2       | Toast notifications                         |
+| **Charts**           | Recharts             | 3.1.2       | Data visualization                          |
+| **Date Handling**    | Date-fns             | 4.1.0       | Date utility functions                      |
 
-### State Management
-- **Redux Toolkit** - Predictable state container
-- **React Redux** - Official React bindings for Redux [3](#0-2) 
+## User Role Architecture
+GoCart implements a three-tier user access model with distinct interfaces and permissions:
+- **Customer**: Can browse products, manage their cart, and place orders.
+- **Store Owner**: Can manage their store, products, and fulfill orders.
+- **Admin**: Can approve stores, manage coupons, and view analytics across the platform.
 
-### Backend & Database
-- **Prisma ORM** - Type-safe database client
-- **PostgreSQL** - Relational database
-- **Server Actions** - Next.js server-side functions [4](#0-3) 
+## Application Structure
+- **App Router**: Modular structure for public, store, and admin interfaces ([app/layout.jsx](app/layout.jsx))
+- **State Management**: Centralized Redux store ([app/StoreProvider.js](app/StoreProvider.js), [lib/store.js](lib/store.js))
+- **Database Schema**: Prisma models for User, Store, Product, Order, Rating, Coupon ([prisma/schema.prisma](prisma/schema.prisma))
+- **Authentication**: Clerk integration ([middleware.ts](middleware.ts))
 
-### Authentication & Security
-- **Clerk** - Authentication and user management
-- **Middleware** - Route protection and authentication [5](#0-4) 
+## Core Features Overview
+| Feature Category        | Key Components                        | Database Models      |
+| ----------------------- | ------------------------------------- | -------------------- |
+| **User Management**     | ClerkProvider, User authentication    | User, Address        |
+| **Store Operations**    | Store dashboard, product management   | Store, Product       |
+| **Shopping Experience** | Shopping cart, product catalog        | Product, User.cart   |
+| **Order Processing**    | Multi-vendor checkout, order tracking | Order, OrderItem     |
+| **Rating System**       | Product reviews, store ratings        | Rating               |
+| **Admin Controls**      | Store approval, coupon management     | Store.status, Coupon |
 
 ## 🏗️ Architecture Overview
 
