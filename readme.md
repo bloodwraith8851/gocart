@@ -46,195 +46,78 @@ GoCart implements a three-tier user access model with distinct interfaces and pe
 | **Rating System**       | Product reviews, store ratings        | Rating               |
 | **Admin Controls**      | Store approval, coupon management     | Store.status, Coupon |
 
-## 🏗️ Architecture Overview
+---
 
-### Application Structure
+## 🏗️ High-Level System Architecture
 
 ```mermaid
-graph TB
-    A["🌐 Public Interface"] --> B["🏪 Store Interface"]
-    A --> C["⚙️ Admin Interface"]
-    B --> D["📊 Redux Store"]
-    C --> D
+%% High-level system architecture
+flowchart TB
+    subgraph Frontend
+        A[Public Interface]
+        B[Store Owner Interface]
+        C[Admin Interface]
+    end
+    subgraph Backend
+        D[Redux Store]
+        E[Prisma ORM]
+        F[PostgreSQL DB]
+        G[Clerk Auth]
+    end
     A --> D
-    D --> E["🗄️ Prisma ORM"]
-    E --> F["🐘 PostgreSQL Database"]
-    G["🔐 Clerk Auth"] --> A
-    G --> B
-    G --> C
+    B --> D
+    C --> D
+    D --> E
+    E --> F
+    A -.-> G
+    B -.-> G
+    C -.-> G
+    G --> D
 ```
+*Figure: High-level architecture showing modular interfaces, centralized state, and authentication.*
 
-### Core Architecture Components
+---
 
-1. **Multi-Layout System**
-   - Public Layout for customer-facing pages
-   - Store Layout for seller dashboard
-   - Admin Layout for platform administration [6](#0-5) 
+## 👤 User Role Access Flow
 
-2. **Route-based Organization**
-   - `(public)/` - Customer shopping experience
-   - `store/` - Store owner management
-   - `admin/` - Platform administration
+```mermaid
+%% User role access and permissions
+flowchart TB
+    U[User] -->|Browse, Shop| Public[Public Interface]
+    U -->|Owns Store| StoreOwner[Store Owner Interface]
+    U -->|Is Admin| Admin[Admin Interface]
+    StoreOwner -->|Manages| Store[Store]
+    Store -->|Sells| Product[Product]
+    Public -->|Places| Order[Order]
+    Admin -->|Approves| Store
+    Admin -->|Manages| Coupon[Coupon]
+    Admin -->|Views| Analytics[Analytics]
+```
+*Figure: User role flow and permissions across the platform.*
 
-3. **Component Architecture**
-   - Shared components for common UI elements
-   - Feature-specific components for each user type
-   - Layout components for different user interfaces
+---
 
-## 📊 Data Schema
-
-### Core Entities
-
-**User Management** [7](#0-6) 
-
-**Product Catalog** [8](#0-7) 
-
-**Order Processing** [9](#0-8) 
-
-**Store Management** [10](#0-9) 
-
-### Database Relationships
+## 🗄️ Detailed Data Model (Entity Relationship)
 
 ```mermaid
 erDiagram
-    USER ||--o{ RATING : "writes"
-    USER ||--o{ ADDRESS : "has"
-    USER ||--o| STORE : "owns"
-    USER ||--o{ ORDER : "places"
-    
-    STORE ||--o{ PRODUCT : "sells"
-    STORE ||--o{ ORDER : "receives"
-    
-    PRODUCT ||--o{ RATING : "receives"
-    PRODUCT ||--o{ ORDERITEM : "included_in"
-    
-    ORDER ||--o{ ORDERITEM : "contains"
-    ORDER ||--|| ADDRESS : "ships_to"
-    
-    ADDRESS }o--|| USER : "belongs_to"
+    USER ||--o{ RATING : writes
+    USER ||--o{ ADDRESS : has
+    USER ||--o| STORE : owns
+    USER ||--o{ ORDER : places
+    STORE ||--o{ PRODUCT : sells
+    STORE ||--o{ ORDER : receives
+    PRODUCT ||--o{ RATING : receives
+    PRODUCT ||--o{ ORDERITEM : included_in
+    ORDER ||--o{ ORDERITEM : contains
+    ORDER ||--|| ADDRESS : ships_to
+    ADDRESS }o--|| USER : belongs_to
+    STORE ||--o{ COUPON : offers
+    ORDER ||--o| COUPON : uses
 ```
+*Figure: Entity relationship diagram for users, stores, products, orders, and coupons.*
 
-## 🔐 Authentication & Middleware
-
-### Authentication System
-- **Provider**: Clerk Authentication
-- **Features**: Sign-in, sign-up, user management
-- **Integration**: Seamless Next.js integration [11](#0-10) 
-
-### Route Protection
-- Middleware-based route protection
-- Automatic authentication checks
-- Protected admin and store routes [12](#0-11) 
-
-## 🎨 User Interfaces
-
-### 1. Public Store Interface
-
-**Homepage Components** [13](#0-12) 
-
-**Navigation & Shopping** [14](#0-13) 
-
-**Key Features:**
-- Product browsing and search
-- Shopping cart functionality
-- User authentication
-- Order tracking
-
-### 2. Store Owner Dashboard
-
-**Dashboard Overview** [15](#0-14) 
-
-**Store Management Features:**
-- Product management (add, edit, delete)
-- Order processing and tracking
-- Revenue and analytics dashboard
-- Customer reviews and ratings [16](#0-15) 
-
-### 3. Admin Interface
-
-**Admin Dashboard** [17](#0-16) 
-
-**Administrative Features:**
-- Store approval and management
-- Platform-wide analytics
-- Coupon management
-- User oversight [18](#0-17) 
-
-## 🔧 Core Components
-
-### State Management (Redux)
-
-**Cart Management** [19](#0-18) 
-
-**Available Reducers:**
-- Cart operations (add, remove, clear)
-- Product management
-- Address handling
-- Rating system [20](#0-19) 
-
-### Reusable Components
-
-**Navigation Components:**
-- Navbar with cart integration
-- Admin navigation
-- Store owner navigation
-
-**UI Components:**
-- Product cards and details
-- Loading states
-- Modals and forms
-- Rating systems [21](#0-20) 
-
-## ✨ Key Features
-
-### 🛒 E-commerce Core
-- **Multi-vendor marketplace** - Multiple stores on one platform
-- **Product catalog** - Comprehensive product management
-- **Shopping cart** - Redux-powered cart system
-- **Order processing** - Complete order lifecycle management
-- **Payment integration** - COD and Stripe support
-
-### 🏪 Store Management
-- **Store creation** - Easy store setup process
-- **Inventory management** - Product CRUD operations
-- **Order fulfillment** - Order status tracking
-- **Analytics dashboard** - Revenue and performance metrics
-- **Review system** - Customer feedback management
-
-### 👑 Platform Administration
-- **Store approval** - Admin review of new stores
-- **Platform analytics** - Overall marketplace insights
-- **Coupon management** - Discount and promotion system
-- **User management** - Platform user oversight
-
-### 🔧 Technical Features
-- **Responsive design** - Mobile-first approach
-- **Type-safe database** - Prisma ORM integration
-- **Authentication** - Secure user management
-- **State persistence** - Redux state management
-- **SEO optimized** - Next.js App Router benefits
-
-## 📁 Project Structure
-
-```
-gocart/
-├── app/
-│   ├── (public)/          # Customer-facing pages
-│   ├── admin/             # Admin dashboard
-│   ├── store/             # Store owner dashboard
-│   └── layout.jsx         # Root layout
-├── components/
-│   ├── admin/             # Admin-specific components
-│   ├── store/             # Store-specific components
-│   └── [shared]/          # Shared UI components
-├── lib/
-│   ├── features/          # Redux slices
-│   └── store.js           # Redux store configuration
-├── prisma/
-│   └── schema.prisma      # Database schema
-├── assets/                # Static assets and dummy data
-└── middleware.ts          # Authentication middleware
-```
+---
 
 ## 🚀 Getting Started
 
