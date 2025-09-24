@@ -18,25 +18,25 @@ export async function POST(request) {
         const address = formData.get('address')
         const image = formData.get('image')
 
-//Check for missing information
+        //Check for missing information
 
-        if(!name || !username || !description || !email || !contact || !address || !image) {
-            return NextResponse.json({error: "missing store information"}, {status: 400})
+        if (!name || !username || !description || !email || !contact || !address || !image) {
+            return NextResponse.json({ error: "missing store information" }, { status: 400 })
         }
 
-//Check if store already exists
+        //Check if store already exists
 
         const store = await prisma.store.findFirst({
             where: {
                 userId: userId
             }
         })
-        
-        if(store) {
-            return NextResponse.json({status: store.status})
+
+        if (store) {
+            return NextResponse.json({ status: store.status })
         }
 
-//Check if username is taken
+        //Check if username is taken
 
         const isUsernameTaken = await prisma.store.findFirst({
             where: {
@@ -44,11 +44,11 @@ export async function POST(request) {
             }
         })
 
-        if(isUsernameTaken) {
-            return NextResponse.json({error: "username is taken"}, {status: 400})
+        if (isUsernameTaken) {
+            return NextResponse.json({ error: "username is taken" }, { status: 400 })
         }
 
-// Upload image to ImageKit
+        // Upload image to ImageKit
 
         const buffer = Buffer.from(await image.arrayBuffer());
         const response = await imagekit.upload({
@@ -60,18 +60,18 @@ export async function POST(request) {
         const optimizedImage = imagekit.url({
             path: response.filePath,
             transforms: [
-                {quality: 'auto'},
-                {format: 'webp'},
-                {height: '512'},
-                
+                { quality: 'auto' },
+                { format: 'webp' },
+                { height: '512' },
+
             ]
         })
 
-//Create store
+        //Create store
 
         const newStore = await prisma.store.create({
             data: {
-                userID,
+                userId,
                 name,
                 description,
                 username: username.toLowerCase(),
@@ -82,7 +82,7 @@ export async function POST(request) {
             }
         })
 
-//Link store to user
+        //Link store to user
 
         await prisma.user.update({
             where: {
@@ -93,11 +93,11 @@ export async function POST(request) {
             }
         })
 
-        return NextResponse.json({message: "applied, waiting for approval"})
-        
+        return NextResponse.json({ message: "applied, waiting for approval" })
+
     } catch (error) {
         console.error(error);
-        return NextResponse.json({error: error.code || error.message }, {status: 400});
+        return NextResponse.json({ error: error.code || error.message }, { status: 400 });
     }
 }
 
@@ -112,14 +112,14 @@ export async function GET(request) {
             }
         })
 
-        if(store) {
-            return NextResponse.json({status: store.status})
+        if (store) {
+            return NextResponse.json({ status: store.status })
         }
 
-        return NextResponse.json({status: "not registered"})
+        return NextResponse.json({ status: "not registered" })
 
     } catch (error) {
         console.error(error);
-        return NextResponse.json({error: error.code || error.message }, {status: 400});
+        return NextResponse.json({ error: error.code || error.message }, { status: 400 });
     }
 }
