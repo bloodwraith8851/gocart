@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
-import authSeller from "@/middleware/authSeller";
+import authSeller from "@/middlewares/authSeller";
 import { use } from "react";
 
 export async function GET(request) {
