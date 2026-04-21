@@ -1,22 +1,124 @@
 @import "tailwindcss";
 
-@layer components {
-    @keyframes marqueeScroll {
-        0% {
-            transform: translateX(0%);
-        }
-        100% {
-            transform: translateX(-50%);
-        }
-    }
+/* ============================================================
+   APPLE DESIGN TOKENS — CSS CUSTOM PROPERTIES
+   ============================================================ */
+:root {
+    --color-accent:       #0071e3;
+    --color-accent-hover: #0077ed;
+    --color-link-light:   #0066cc;
+    --color-link-dark:    #2997ff;
+    --font-display: "Inter", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+    --font-text:    "Inter", system-ui, -apple-system, "Helvetica Neue", sans-serif;
 }
 
-@layer base {
-    button {
-        cursor: pointer;
-    }
+/* ============================================================
+   GLOBAL RESETS
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+body {
+    background-color: #ffffff;
+    color: #1d1d1f;
+    font-family: var(--font-text);
+    font-size: 17px;
+    line-height: 1.47;
+    letter-spacing: -0.374px;
 }
 
-.no-scrollbar::-webkit-scrollbar {
-    display: none;
+button { cursor: pointer; }
+
+/* ============================================================
+   SKELETON SHIMMER
+   ============================================================ */
+@keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
 }
+
+.skeleton {
+    background: linear-gradient(90deg, #e8e8e8 25%, #f0f0f0 50%, #e8e8e8 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: 5px;
+}
+
+.skeleton-dark {
+    background: linear-gradient(90deg, #2a2a2a 25%, #323232 50%, #2a2a2a 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: 5px;
+}
+
+/* ============================================================
+   MARQUEE
+   ============================================================ */
+@keyframes marqueeScroll {
+    0%   { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marqueeScroll 25s linear infinite; }
+
+/* ============================================================
+   TOGGLE SWITCH
+   ============================================================ */
+.toggle-track {
+    width: 44px;
+    height: 24px;
+    background-color: rgba(0,0,0,0.15);
+    border-radius: 12px;
+    position: relative;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.toggle-track.on { background-color: #0071e3; }
+.toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.toggle-track.on .toggle-thumb { transform: translateX(20px); }
+
+/* ============================================================
+   PAGE FADE-IN
+   ============================================================ */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter { animation: fadeIn 0.35s ease forwards; }
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.text-balance { text-wrap: balance; }
+
+/* ============================================================
+   PERFORMANCE — content-visibility for below-fold sections
+   ============================================================ */
+.cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 500px; /* prevents layout shift */
+}
+
+/* ============================================================
+   FADE-IN — skeleton → content transition
+   ============================================================ */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up { animation: fadeInUp 0.4s ease forwards; }
+
+/* Smooth image reveal — handled per-component via JS onLoad */

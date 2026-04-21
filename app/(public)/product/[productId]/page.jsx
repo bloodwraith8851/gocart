@@ -1,43 +1,84 @@
 'use client'
 import ProductDescription from "@/components/ProductDescription";
 import ProductDetails from "@/components/ProductDetails";
+import RatingModal from "@/components/RatingModal";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import Link from "next/link";
 
 export default function Product() {
-
     const { productId } = useParams();
-    const [product, setProduct] = useState();
-    const products = useSelector(state => state.product.list);
-
-    const fetchProduct = async () => {
-        const product = products.find((product) => product.id === productId);
-        setProduct(product);
-    }
+    const products      = useSelector((state) => state.product.list);
+    const [product,      setProduct]      = useState(null);
+    const [ratingModal,  setRatingModal]  = useState(null);
 
     useEffect(() => {
         if (products.length > 0) {
-            fetchProduct()
+            const found = products.find((p) => p.id === productId);
+            setProduct(found || null);
         }
-        scrollTo(0, 0)
-    }, [productId,products]);
+        window.scrollTo(0, 0);
+    }, [productId, products]);
+
+    // Skeleton while products load
+    if (!product && products.length === 0) {
+        return (
+            <div style={{ maxWidth: "980px", margin: "0 auto", padding: "40px 20px" }}>
+                <div className="skeleton" style={{ height: "16px", width: "200px", marginBottom: "40px", borderRadius: "5px" }} />
+                <div style={{ display: "flex", gap: "40px", flexWrap: "wrap" }}>
+                    <div className="skeleton" style={{ width: "380px", height: "380px", borderRadius: "12px" }} />
+                    <div style={{ flex: 1, minWidth: "240px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                        <div className="skeleton" style={{ height: "20px", width: "40%", borderRadius: "5px" }} />
+                        <div className="skeleton" style={{ height: "36px", width: "80%", borderRadius: "5px" }} />
+                        <div className="skeleton" style={{ height: "28px", width: "30%", borderRadius: "5px" }} />
+                        <div className="skeleton" style={{ height: "48px", width: "160px", borderRadius: "24px", marginTop: "16px" }} />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Not found
+    if (!product && products.length > 0) {
+        return (
+            <div style={{ minHeight: "70vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "20px" }}>
+                <p style={{ fontSize: "48px", marginBottom: "16px" }}>🔍</p>
+                <h1 style={{ fontFamily: "'Inter',sans-serif", fontSize: "28px", fontWeight: 700, color: "#1d1d1f" }}>Product not found</h1>
+                <Link href="/shop" style={{ marginTop: "24px", color: "#0066cc", fontSize: "15px" }}>← Back to Shop</Link>
+            </div>
+        );
+    }
 
     return (
-        <div className="mx-6">
-            <div className="max-w-7xl mx-auto">
+        <div style={{ backgroundColor: "#fff", minHeight: "80vh" }}>
+            <div style={{ maxWidth: "980px", margin: "0 auto", padding: "24px 20px" }}>
 
-                {/* Breadcrums */}
-                <div className="  text-gray-600 text-sm mt-8 mb-5">
-                    Home / Products / {product?.category}
-                </div>
+                {/* Breadcrumb */}
+                {product && (
+                    <nav style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "13px", color: "rgba(0,0,0,0.48)", marginBottom: "32px" }}>
+                        <Link href="/" style={{ color: "#0066cc", textDecoration: "none" }}>Home</Link>
+                        <span>/</span>
+                        <Link href="/shop" style={{ color: "#0066cc", textDecoration: "none" }}>Shop</Link>
+                        <span>/</span>
+                        <Link href={`/shop?search=${product.category}`} style={{ color: "#0066cc", textDecoration: "none" }}>{product.category}</Link>
+                        <span>/</span>
+                        <span style={{ color: "#1d1d1f", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "200px" }}>
+                            {product.name}
+                        </span>
+                    </nav>
+                )}
 
-                {/* Product Details */}
-                {product && (<ProductDetails product={product} />)}
-
-                {/* Description & Reviews */}
-                {product && (<ProductDescription product={product} />)}
+                {/* Product details + description */}
+                {product && (
+                    <>
+                        <ProductDetails product={product} />
+                        <ProductDescription product={product} setRatingModal={setRatingModal} />
+                    </>
+                )}
             </div>
+
+            {ratingModal && <RatingModal ratingModal={ratingModal} setRatingModal={setRatingModal} />}
         </div>
     );
 }

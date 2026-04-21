@@ -3,47 +3,56 @@ import { useEffect, useState } from "react"
 import Loading from "../Loading"
 import Link from "next/link"
 import { ArrowRightIcon } from "lucide-react"
-import SellerNavbar from "./StoreNavbar"
-import SellerSidebar from "./StoreSidebar"
-import { dummyStoreData } from "@/assets/assets"
+import StoreNavbar from "./StoreNavbar"
+import StoreSidebar from "./StoreSidebar"
 
-const StoreLayout = ({ children }) => {
-
-
-    const [isSeller, setIsSeller] = useState(false)
-    const [loading, setLoading] = useState(true)
+export default function StoreLayout({ children }) {
+    const [isSeller,  setIsSeller]  = useState(false)
+    const [loading,   setLoading]   = useState(true)
     const [storeInfo, setStoreInfo] = useState(null)
 
-    const fetchIsSeller = async () => {
-        setIsSeller(true)
-        setStoreInfo(dummyStoreData)
-        setLoading(false)
-    }
-
     useEffect(() => {
-        fetchIsSeller()
+        ;(async () => {
+            try {
+                const res  = await fetch("/api/store/is-seller")
+                const data = await res.json()
+                setIsSeller(!!data.isSeller)
+                setStoreInfo(data.storeInfo || null)
+            } catch {
+                setIsSeller(false)
+            } finally {
+                setLoading(false)
+            }
+        })()
     }, [])
 
-    return loading ? (
-        <Loading />
-    ) : isSeller ? (
-        <div className="flex flex-col h-screen">
-            <SellerNavbar />
-            <div className="flex flex-1 items-start h-full overflow-y-scroll no-scrollbar">
-                <SellerSidebar storeInfo={storeInfo} />
-                <div className="flex-1 h-full p-5 lg:pl-12 lg:pt-12 overflow-y-scroll">
-                    {children}
-                </div>
+    if (loading) return <Loading />
+
+    if (!isSeller) {
+        return (
+            <div style={{ minHeight: "100vh", backgroundColor: "#000", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "20px" }}>
+                <h1 style={{ fontSize: "28px", fontWeight: 600, color: "rgba(255,255,255,0.56)" }}>
+                    No approved store found
+                </h1>
+                <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.32)", marginTop: "8px" }}>
+                    Apply to become a seller on GoCart.
+                </p>
+                <Link href="/create-store" style={{ marginTop: "28px", backgroundColor: "#0071e3", color: "#fff", textDecoration: "none", borderRadius: "980px", padding: "12px 28px", fontSize: "15px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    Create a Store <ArrowRightIcon size={15} />
+                </Link>
             </div>
-        </div>
-    ) : (
-        <div className="min-h-screen flex flex-col items-center justify-center text-center px-6">
-            <h1 className="text-2xl sm:text-4xl font-semibold text-slate-400">You are not authorized to access this page</h1>
-            <Link href="/" className="bg-slate-700 text-white flex items-center gap-2 mt-8 p-2 px-6 max-sm:text-sm rounded-full">
-                Go to home <ArrowRightIcon size={18} />
-            </Link>
+        )
+    }
+
+    return (
+        <div style={{ minHeight: "100vh", backgroundColor: "#000", display: "flex", flexDirection: "column" }}>
+            <StoreNavbar />
+            <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+                <StoreSidebar storeInfo={storeInfo} />
+                <main style={{ flex: 1, overflowY: "auto", padding: "40px 48px" }}>
+                    {children}
+                </main>
+            </div>
         </div>
     )
 }
-
-export default StoreLayout

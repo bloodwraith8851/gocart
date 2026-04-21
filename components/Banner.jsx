@@ -1,31 +1,132 @@
 'use client'
-import React from 'react'
-import toast from 'react-hot-toast';
+import { useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
+import { X, Sparkles } from 'lucide-react'
+
+// Rotating offer messages
+const MESSAGES = [
+    { text: "🎉 Get 20% OFF your first order!", code: "NEW20" },
+    { text: "⚡ Free shipping on all orders today", code: null },
+    { text: "🔥 Flash sale — up to 30% off electronics", code: "VIP30" },
+]
 
 export default function Banner() {
+    const [isOpen,  setIsOpen]  = useState(true)
+    const [msgIdx,  setMsgIdx]  = useState(0)
+    const [fading,  setFading]  = useState(false)
 
-    const [isOpen, setIsOpen] = React.useState(true);
+    // Rotate messages every 4 seconds
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setFading(true)
+            setTimeout(() => {
+                setMsgIdx((i) => (i + 1) % MESSAGES.length)
+                setFading(false)
+            }, 300)
+        }, 4000)
+        return () => clearInterval(timer)
+    }, [])
 
     const handleClaim = () => {
-        setIsOpen(false);
-        toast.success('Coupon copied to clipboard!');
-        navigator.clipboard.writeText('NEW20');
-    };
+        const code = MESSAGES[msgIdx].code
+        if (code) {
+            navigator.clipboard?.writeText(code).catch(() => {})
+            toast.success(`Code "${code}" copied to clipboard!`)
+        }
+        setIsOpen(false)
+    }
 
-    return isOpen && (
-        <div className="w-full px-6 py-1 font-medium text-sm text-white text-center bg-gradient-to-r from-violet-500 via-[#9938CA] to-[#E0724A]">
-            <div className='flex items-center justify-between max-w-7xl  mx-auto'>
-                <p>Get 20% OFF on Your First Order!</p>
-                <div className="flex items-center space-x-6">
-                    <button onClick={handleClaim} type="button" className="font-normal text-gray-800 bg-white px-7 py-2 rounded-full max-sm:hidden">Claim Offer</button>
-                    <button onClick={() => setIsOpen(false)} type="button" className="font-normal text-gray-800 py-2 rounded-full">
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect y="12.532" width="17.498" height="2.1" rx="1.05" transform="rotate(-45.74 0 12.532)" fill="#fff" />
-                            <rect x="12.533" y="13.915" width="17.498" height="2.1" rx="1.05" transform="rotate(-135.74 12.533 13.915)" fill="#fff" />
-                        </svg>
-                    </button>
-                </div>
+    if (!isOpen) return null
+
+    return (
+        <div style={{
+            background: "linear-gradient(90deg, #0a0a0a 0%, #0d1f3c 40%, #001d6c 60%, #0071e3 100%)",
+            padding: "10px 20px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            gap: "16px",
+            position: "relative",
+            overflow: "hidden",
+        }}>
+            {/* Animated shimmer line */}
+            <div style={{
+                position: "absolute", inset: 0, pointerEvents: "none",
+                background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%)",
+                animation: "bannerShimmer 3s linear infinite",
+            }} />
+
+            {/* Left icon */}
+            <Sparkles size={14} style={{ color: "#60a5fa", flexShrink: 0 }} />
+
+            {/* Rotating message */}
+            <p style={{
+                fontSize: "13px", fontWeight: 500, color: "#fff",
+                textAlign: "center",
+                transition: "opacity 0.3s ease",
+                opacity: fading ? 0 : 1,
+                margin: 0,
+            }}>
+                {MESSAGES[msgIdx].text}
+            </p>
+
+            {/* Claim button */}
+            {MESSAGES[msgIdx].code && (
+                <button onClick={handleClaim} style={{
+                    backgroundColor: "rgba(255,255,255,0.12)",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    borderRadius: "980px",
+                    color: "#fff",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    padding: "4px 14px",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    backdropFilter: "blur(4px)",
+                    transition: "background-color 0.15s",
+                }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.12)"; }}
+                >
+                    Copy Code
+                </button>
+            )}
+
+            {/* Dots indicator */}
+            <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
+                {MESSAGES.map((_, i) => (
+                    <button key={i} onClick={() => setMsgIdx(i)} style={{
+                        width: i === msgIdx ? "16px" : "5px",
+                        height: "5px",
+                        backgroundColor: i === msgIdx ? "#60a5fa" : "rgba(255,255,255,0.3)",
+                        borderRadius: "3px",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: 0,
+                        transition: "all 0.3s ease",
+                    }} />
+                ))}
             </div>
+
+            {/* Close */}
+            <button onClick={() => setIsOpen(false)} style={{
+                background: "none", border: "none", cursor: "pointer",
+                color: "rgba(255,255,255,0.5)", padding: "2px",
+                display: "flex", alignItems: "center",
+                position: "absolute", right: "16px",
+                transition: "color 0.15s",
+            }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "#fff"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}
+                aria-label="Close"
+            >
+                <X size={13} />
+            </button>
+
+            <style>{`
+                @keyframes bannerShimmer {
+                    from { transform: translateX(-100%); }
+                    to   { transform: translateX(200%); }
+                }
+            `}</style>
         </div>
-    );
-};
+    )
+}

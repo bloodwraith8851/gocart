@@ -1,135 +1,188 @@
 'use client'
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { format } from "date-fns"
 import toast from "react-hot-toast"
-import { DeleteIcon } from "lucide-react"
-import { couponDummyData } from "@/assets/assets"
+import { Trash2Icon, TagIcon, PlusIcon } from "lucide-react"
+import Loading from "@/components/Loading"
+
+const inp = { width: "100%", backgroundColor: "#0d0d0f", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "9px", padding: "10px 12px", fontSize: "13px", color: "#fff", fontFamily: "'Inter',sans-serif", outline: "none" }
 
 export default function AdminCoupons() {
+    const [coupons,     setCoupons]     = useState([])
+    const [loading,     setLoading]     = useState(true)
+    const [formLoading, setFormLoading] = useState(false)
+    const [newCoupon, setNewCoupon] = useState({ code: "", description: "", discount: "", forNewUser: false, forMember: false, isPublic: true, expiresAt: "" })
 
-    const [coupons, setCoupons] = useState([])
+    const fetchCoupons = useCallback(async () => {
+        try {
+            const res  = await fetch("/api/admin/coupons")
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error)
+            setCoupons(data.coupons || [])
+        } catch (err) { toast.error(err.message) }
+        finally { setLoading(false) }
+    }, [])
 
-    const [newCoupon, setNewCoupon] = useState({
-        code: '',
-        description: '',
-        discount: '',
-        forNewUser: false,
-        forMember: false,
-        isPublic: false,
-        expiresAt: new Date()
-    })
-
-    const fetchCoupons = async () => {
-        setCoupons(couponDummyData)
-    }
-
-    const handleAddCoupon = async (e) => {
+    const handleAdd = async (e) => {
         e.preventDefault()
-        // Logic to add a coupon
-
-
-    }
-
-    const handleChange = (e) => {
-        setNewCoupon({ ...newCoupon, [e.target.name]: e.target.value })
+        setFormLoading(true)
+        try {
+            const res  = await fetch("/api/admin/coupons", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newCoupon) })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error || "Failed")
+            setCoupons((prev) => [data.coupon, ...prev])
+            setNewCoupon({ code: "", description: "", discount: "", forNewUser: false, forMember: false, isPublic: true, expiresAt: "" })
+            toast.success("Coupon created!")
+        } catch (err) { toast.error(err.message) }
+        finally { setFormLoading(false) }
     }
 
     const deleteCoupon = async (code) => {
-        // Logic to delete a coupon
-
-
+        const res  = await fetch(`/api/admin/coupons?code=${code}`, { method: "DELETE" })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || "Failed")
+        setCoupons((prev) => prev.filter((c) => c.code !== code))
     }
 
-    useEffect(() => {
-        fetchCoupons();
-    }, [])
+    useEffect(() => { fetchCoupons() }, [fetchCoupons])
+
+    if (loading) return <Loading />
 
     return (
-        <div className="text-slate-500 mb-40">
+        <div style={{ animation: "fadein 0.4s ease", paddingBottom: "64px" }}>
+            {/* Header */}
+            <div style={{ marginBottom: "32px" }}>
+                <h1 style={{ fontFamily: "'Inter',sans-serif", fontSize: "28px", fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", marginBottom: "4px" }}>
+                    Coupons
+                </h1>
+                <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.36)" }}>{coupons.length} active coupons</p>
+            </div>
 
-            {/* Add Coupon */}
-            <form onSubmit={(e) => toast.promise(handleAddCoupon(e), { loading: "Adding coupon..." })} className="max-w-sm text-sm">
-                <h2 className="text-2xl">Add <span className="text-slate-800 font-medium">Coupons</span></h2>
-                <div className="flex gap-2 max-sm:flex-col mt-2">
-                    <input type="text" placeholder="Coupon Code" className="w-full mt-2 p-2 border border-slate-200 outline-slate-400 rounded-md"
-                        name="code" value={newCoupon.code} onChange={handleChange} required
-                    />
-                    <input type="number" placeholder="Coupon Discount (%)" min={1} max={100} className="w-full mt-2 p-2 border border-slate-200 outline-slate-400 rounded-md"
-                        name="discount" value={newCoupon.discount} onChange={handleChange} required
-                    />
-                </div>
-                <input type="text" placeholder="Coupon Description" className="w-full mt-2 p-2 border border-slate-200 outline-slate-400 rounded-md"
-                    name="description" value={newCoupon.description} onChange={handleChange} required
-                />
-
-                <label>
-                    <p className="mt-3">Coupon Expiry Date</p>
-                    <input type="date" placeholder="Coupon Expires At" className="w-full mt-1 p-2 border border-slate-200 outline-slate-400 rounded-md"
-                        name="expiresAt" value={format(newCoupon.expiresAt, 'yyyy-MM-dd')} onChange={handleChange}
-                    />
-                </label>
-
-                <div className="mt-5">
-                    <div className="flex gap-2 mt-3">
-                        <label className="relative inline-flex items-center cursor-pointer text-gray-900 gap-3">
-                            <input type="checkbox" className="sr-only peer"
-                                name="forNewUser" checked={newCoupon.forNewUser}
-                                onChange={(e) => setNewCoupon({ ...newCoupon, forNewUser: e.target.checked })}
-                            />
-                            <div className="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-green-600 transition-colors duration-200"></div>
-                            <span className="dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-5"></span>
-                        </label>
-                        <p>For New User</p>
+            <div style={{ display: "grid", gridTemplateColumns: "minmax(300px, 400px) 1fr", gap: "20px", alignItems: "start" }}>
+                {/* CREATE FORM */}
+                <div style={{ backgroundColor: "#161618", borderRadius: "14px", padding: "24px", border: "1px solid rgba(255,255,255,0.07)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "20px" }}>
+                        <PlusIcon size={15} style={{ color: "#0071e3" }} />
+                        <h2 style={{ color: "#fff", fontWeight: 700, fontSize: "16px" }}>Create Coupon</h2>
                     </div>
-                    <div className="flex gap-2 mt-3">
-                        <label className="relative inline-flex items-center cursor-pointer text-gray-900 gap-3">
-                            <input type="checkbox" className="sr-only peer"
-                                name="forMember" checked={newCoupon.forMember}
-                                onChange={(e) => setNewCoupon({ ...newCoupon, forMember: e.target.checked })}
+                    <form onSubmit={handleAdd} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                            <div>
+                                <label style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.4)", display: "block", marginBottom: "5px", textTransform: "uppercase", letterSpacing: "0.07em" }}>Code</label>
+                                <input value={newCoupon.code} onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase() })}
+                                    placeholder="SAVE20" style={inp} required
+                                    onFocus={(e) => { e.target.style.borderColor = "#0071e3"; e.target.style.boxShadow = "0 0 0 2px rgba(0,113,227,0.2)"; }}
+                                    onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; e.target.style.boxShadow = "none"; }}
+                                />
+                            </div>
+                            <div>
+                                <label style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.4)", display: "block", marginBottom: "5px", textTransform: "uppercase", letterSpacing: "0.07em" }}>Discount %</label>
+                                <input type="number" min={1} max={100} value={newCoupon.discount} onChange={(e) => setNewCoupon({ ...newCoupon, discount: e.target.value })}
+                                    placeholder="20" style={inp} required
+                                    onFocus={(e) => { e.target.style.borderColor = "#0071e3"; e.target.style.boxShadow = "0 0 0 2px rgba(0,113,227,0.2)"; }}
+                                    onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; e.target.style.boxShadow = "none"; }}
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.4)", display: "block", marginBottom: "5px", textTransform: "uppercase", letterSpacing: "0.07em" }}>Description</label>
+                            <input value={newCoupon.description} onChange={(e) => setNewCoupon({ ...newCoupon, description: e.target.value })}
+                                placeholder="Brief description" style={inp} required
+                                onFocus={(e) => { e.target.style.borderColor = "#0071e3"; e.target.style.boxShadow = "0 0 0 2px rgba(0,113,227,0.2)"; }}
+                                onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; e.target.style.boxShadow = "none"; }}
                             />
-                            <div className="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:bg-green-600 transition-colors duration-200"></div>
-                            <span className="dot absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-5"></span>
-                        </label>
-                        <p>For Member</p>
-                    </div>
-                </div>
-                <button className="mt-4 p-2 px-10 rounded bg-slate-700 text-white active:scale-95 transition">Add Coupon</button>
-            </form>
+                        </div>
+                        <div>
+                            <label style={{ fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.4)", display: "block", marginBottom: "5px", textTransform: "uppercase", letterSpacing: "0.07em" }}>Expiry Date</label>
+                            <input type="date" value={newCoupon.expiresAt} onChange={(e) => setNewCoupon({ ...newCoupon, expiresAt: e.target.value })}
+                                style={{ ...inp, colorScheme: "dark" }} required
+                                onFocus={(e) => { e.target.style.borderColor = "#0071e3"; }}
+                                onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; }}
+                            />
+                        </div>
 
-            {/* List Coupons */}
-            <div className="mt-14">
-                <h2 className="text-2xl">List <span className="text-slate-800 font-medium">Coupons</span></h2>
-                <div className="overflow-x-auto mt-4 rounded-lg border border-slate-200 max-w-4xl">
-                    <table className="min-w-full bg-white text-sm">
-                        <thead className="bg-slate-50">
-                            <tr>
-                                <th className="py-3 px-4 text-left font-semibold text-slate-600">Code</th>
-                                <th className="py-3 px-4 text-left font-semibold text-slate-600">Description</th>
-                                <th className="py-3 px-4 text-left font-semibold text-slate-600">Discount</th>
-                                <th className="py-3 px-4 text-left font-semibold text-slate-600">Expires At</th>
-                                <th className="py-3 px-4 text-left font-semibold text-slate-600">New User</th>
-                                <th className="py-3 px-4 text-left font-semibold text-slate-600">For Member</th>
-                                <th className="py-3 px-4 text-left font-semibold text-slate-600">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200">
-                            {coupons.map((coupon) => (
-                                <tr key={coupon.code} className="hover:bg-slate-50">
-                                    <td className="py-3 px-4 font-medium text-slate-800">{coupon.code}</td>
-                                    <td className="py-3 px-4 text-slate-800">{coupon.description}</td>
-                                    <td className="py-3 px-4 text-slate-800">{coupon.discount}%</td>
-                                    <td className="py-3 px-4 text-slate-800">{format(coupon.expiresAt, 'yyyy-MM-dd')}</td>
-                                    <td className="py-3 px-4 text-slate-800">{coupon.forNewUser ? 'Yes' : 'No'}</td>
-                                    <td className="py-3 px-4 text-slate-800">{coupon.forMember ? 'Yes' : 'No'}</td>
-                                    <td className="py-3 px-4 text-slate-800">
-                                        <DeleteIcon onClick={() => toast.promise(deleteCoupon(coupon.code), { loading: "Deleting coupon..." })} className="w-5 h-5 text-red-500 hover:text-red-800 cursor-pointer" />
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                        {/* Toggles */}
+                        {[
+                            { key: "forNewUser", label: "For New Users Only" },
+                            { key: "forMember",  label: "For Members Only" },
+                            { key: "isPublic",   label: "Publicly Visible" },
+                        ].map(({ key, label }) => (
+                            <div key={key} style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }} onClick={() => setNewCoupon({ ...newCoupon, [key]: !newCoupon[key] })}>
+                                <div className={`toggle-track ${newCoupon[key] ? "on" : ""}`}>
+                                    <div className="toggle-thumb" />
+                                </div>
+                                <span style={{ fontSize: "13px", color: "rgba(255,255,255,0.56)" }}>{label}</span>
+                            </div>
+                        ))}
+
+                        <button type="submit" disabled={formLoading}
+                            style={{ backgroundColor: "#0071e3", color: "#fff", border: "none", borderRadius: "980px", padding: "11px", fontSize: "14px", fontWeight: 600, cursor: formLoading ? "not-allowed" : "pointer", opacity: formLoading ? 0.7 : 1, marginTop: "4px", transition: "transform 0.15s, box-shadow 0.15s" }}
+                            onMouseEnter={(e) => { if (!formLoading) { e.currentTarget.style.transform = "scale(1.02)"; e.currentTarget.style.boxShadow = "0 6px 24px rgba(0,113,227,0.4)"; } }}
+                            onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "none"; }}
+                        >
+                            {formLoading ? "Creating…" : "Create Coupon"}
+                        </button>
+                    </form>
+                </div>
+
+                {/* COUPON LIST */}
+                <div style={{ backgroundColor: "#161618", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.07)", overflow: "hidden" }}>
+                    <div style={{ padding: "18px 24px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", gap: "8px" }}>
+                        <TagIcon size={15} style={{ color: "#0071e3" }} />
+                        <h2 style={{ color: "#fff", fontWeight: 700, fontSize: "16px" }}>Active Coupons</h2>
+                    </div>
+
+                    {coupons.length === 0 ? (
+                        <div style={{ height: "200px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                            <TagIcon size={32} style={{ color: "rgba(255,255,255,0.12)" }} />
+                            <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "14px" }}>No coupons yet</p>
+                        </div>
+                    ) : (
+                        <div style={{ overflowX: "auto" }}>
+                            <table style={{ minWidth: "520px", width: "100%", borderCollapse: "collapse" }}>
+                                <thead>
+                                    <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                                        {["Code", "Discount", "Description", "Expires", ""].map((h) => (
+                                            <th key={h} style={{ padding: "12px 20px", textAlign: "left", fontSize: "11px", color: "rgba(255,255,255,0.36)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}>{h}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {coupons.map((c) => (
+                                        <tr key={c.code} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+                                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.02)"; }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
+                                        >
+                                            <td style={{ padding: "14px 20px" }}>
+                                                <span style={{ fontFamily: "monospace", fontWeight: 800, color: "#0071e3", fontSize: "13px", backgroundColor: "rgba(0,113,227,0.08)", padding: "3px 10px", borderRadius: "6px" }}>{c.code}</span>
+                                            </td>
+                                            <td style={{ padding: "14px 20px" }}>
+                                                <span style={{ fontWeight: 800, color: "#34c759", fontSize: "15px" }}>{c.discount}%</span>
+                                            </td>
+                                            <td style={{ padding: "14px 20px", color: "rgba(255,255,255,0.56)", fontSize: "13px" }}>{c.description}</td>
+                                            <td style={{ padding: "14px 20px", color: "rgba(255,255,255,0.36)", fontSize: "13px", whiteSpace: "nowrap" }}>
+                                                {format(new Date(c.expiresAt), "MMM d, yyyy")}
+                                            </td>
+                                            <td style={{ padding: "14px 20px" }}>
+                                                <button
+                                                    onClick={() => toast.promise(deleteCoupon(c.code), { loading: "Deleting…", success: "Deleted!", error: "Failed" })}
+                                                    style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,59,48,0.5)", padding: "4px", borderRadius: "6px", transition: "color 0.15s, background-color 0.15s" }}
+                                                    onMouseEnter={(e) => { e.currentTarget.style.color = "#ff3b30"; e.currentTarget.style.backgroundColor = "rgba(255,59,48,0.08)"; }}
+                                                    onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,59,48,0.5)"; e.currentTarget.style.backgroundColor = "transparent"; }}
+                                                >
+                                                    <Trash2Icon size={15} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
             </div>
+
+            <style>{`@keyframes fadein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}`}</style>
         </div>
     )
 }

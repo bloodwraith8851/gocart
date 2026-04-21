@@ -1,22 +1,23 @@
 'use client'
 import Link from "next/link"
+import { UserButton } from "@clerk/nextjs"
 
-const AdminNavbar = () => {
-
-
+export default function AdminNavbar() {
     return (
-        <div className="flex items-center justify-between px-12 py-3 border-b border-slate-200 transition-all">
-            <Link href="/" className="relative text-4xl font-semibold text-slate-700">
-                <span className="text-green-600">go</span>cart<span className="text-green-600 text-5xl leading-0">.</span>
-                <p className="absolute text-xs font-semibold -top-1 -right-13 px-3 p-0.5 rounded-full flex items-center gap-2 text-white bg-green-500">
-                    Admin
-                </p>
+        <header style={{
+            backgroundColor: "rgba(0,0,0,0.85)",
+            backdropFilter: "saturate(180%) blur(20px)",
+            WebkitBackdropFilter: "saturate(180%) blur(20px)",
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
+            height: "48px", display: "flex", alignItems: "center",
+            justifyContent: "space-between", padding: "0 24px",
+            position: "sticky", top: 0, zIndex: 40,
+        }}>
+            <Link href="/" style={{ fontWeight: 700, color: "#fff", fontSize: "15px", letterSpacing: "-0.2px", textDecoration: "none" }}>
+                GoCart<span style={{ color: "#0071e3" }}>.</span>
+                <span style={{ color: "rgba(255,255,255,0.32)", fontWeight: 400, marginLeft: "8px", fontSize: "12px" }}>Admin</span>
             </Link>
-            <div className="flex items-center gap-3">
-                <p>Hi, Admin</p>
-            </div>
-        </div>
+            <UserButton />
+        </header>
     )
 }
-
-export default AdminNavbar
