@@ -63,13 +63,14 @@ export default function CreateStore() {
     const onSubmit = async (e) => {
         e.preventDefault()
         if (!user) return toast.error("Sign in first")
+        if (!storeInfo.image) return toast.error("Please upload a store logo")
         setSubmitting(true)
         try {
             const token    = await getToken()
             const formData = new FormData()
             Object.entries(storeInfo).forEach(([k, v]) => formData.append(k, v))
             const { data } = await axios.post("/api/store/create", formData, { headers: { Authorization: `Bearer ${token}` } })
-            toast.success(data.message)
+            toast.success(data.message || "Applied! Waiting for approval.")
             setAlreadySubmitted(true)
             setStatus("pending")
         } catch (err) {
@@ -144,12 +145,12 @@ export default function CreateStore() {
                     <div>
                         <p style={{ fontSize: "11px", fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: "10px" }}>Store Logo</p>
                         <label htmlFor="store-logo" style={{ display: "inline-flex", alignItems: "center", gap: "14px", cursor: "pointer" }}>
-                            <div style={{ width: "80px", height: "80px", backgroundColor: "#f5f5f7", borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", border: "2px dashed rgba(0,0,0,0.12)", flexShrink: 0, transition: "border-color 0.15s" }}
-                                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#0071e3"; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)"; }}
+                            <div style={{ width: "80px", height: "80px", backgroundColor: "#f5f5f7", borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", border: `2px dashed ${storeInfo.image ? "#34c759" : "rgba(0,0,0,0.12)"}`, flexShrink: 0, transition: "border-color 0.15s", position: "relative" }}
+                                onMouseEnter={(e) => { if (!storeInfo.image) e.currentTarget.style.borderColor = "#0071e3"; }}
+                                onMouseLeave={(e) => { if (!storeInfo.image) e.currentTarget.style.borderColor = "rgba(0,0,0,0.12)"; }}
                             >
                                 {storeInfo.image
-                                    ? <Image src={URL.createObjectURL(storeInfo.image)} alt="" fill style={{ objectFit: "cover" }} />
+                                    ? <Image src={URL.createObjectURL(storeInfo.image)} alt="Store logo" fill style={{ objectFit: "cover" }} />
                                     : <UploadCloudIcon size={28} style={{ color: "rgba(0,0,0,0.2)" }} />
                                 }
                             </div>

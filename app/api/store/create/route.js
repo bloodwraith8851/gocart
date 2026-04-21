@@ -20,8 +20,13 @@ export async function POST(request) {
 
         //Check for missing information
 
-        if (!name || !username || !description || !email || !contact || !address || !image) {
-            return NextResponse.json({ error: "missing store information" }, { status: 400 })
+        if (!name || !username || !description || !email || !contact || !address) {
+            return NextResponse.json({ error: "Please fill in all store fields" }, { status: 400 })
+        }
+
+        // Validate image is a proper uploaded file
+        if (!image || typeof image === 'string' || !(image instanceof Blob) || image.size === 0) {
+            return NextResponse.json({ error: "Please upload a store logo image" }, { status: 400 })
         }
 
         //Check if store already exists

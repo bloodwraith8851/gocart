@@ -5,9 +5,6 @@ const nextConfig = {
     },
 
     experimental: {
-        // Enable instrumentation.js (DB warm-up at server start)
-        instrumentationHook: true,
-
         // Tree-shake heavy packages — reduces per-page bundle size significantly
         optimizePackageImports: [
             "lucide-react",

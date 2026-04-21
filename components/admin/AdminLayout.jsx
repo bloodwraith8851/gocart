@@ -43,6 +43,25 @@ export default function AdminLayout({ children }) {
         )
     }
 
+    if (!isAdmin) {
+        return (
+            <div style={{ minHeight: "100vh", backgroundColor: "#000", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "20px" }}>
+                <div style={{ width: "72px", height: "72px", borderRadius: "18px", backgroundColor: "rgba(255,59,48,0.1)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "24px" }}>
+                    <span style={{ fontSize: "32px" }}>🚫</span>
+                </div>
+                <h1 style={{ fontSize: "24px", fontWeight: 600, color: "rgba(255,255,255,0.86)", marginBottom: "8px" }}>
+                    Access Denied
+                </h1>
+                <p style={{ fontSize: "15px", color: "rgba(255,255,255,0.36)" }}>
+                    You don&apos;t have permission to access the admin panel.
+                </p>
+                <Link href="/" style={{ marginTop: "28px", backgroundColor: "#0071e3", color: "#fff", textDecoration: "none", borderRadius: "980px", padding: "12px 28px", fontSize: "15px", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    Go Home <ArrowRightIcon size={15} />
+                </Link>
+            </div>
+        )
+    }
+
     return (
         <div style={{ minHeight: "100vh", backgroundColor: "#000", display: "flex", flexDirection: "column" }}>
             <AdminNavbar />
