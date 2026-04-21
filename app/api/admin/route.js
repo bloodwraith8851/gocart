@@ -1,12 +1,7 @@
 import { getAuth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
-
-const ADMIN_USER_ID = process.env.ADMIN_USER_ID;
-
-function isAdmin(userId) {
-    return userId && ADMIN_USER_ID && userId === ADMIN_USER_ID;
-}
+import { isAdmin } from "@/lib/adminAuth";
 
 // GET — admin dashboard stats
 export async function GET(request) {

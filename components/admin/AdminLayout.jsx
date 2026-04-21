@@ -16,13 +16,14 @@ export default function AdminLayout({ children }) {
 
     if (!isLoaded) return <Loading />
 
-    // If NEXT_PUBLIC_ADMIN_USER_ID is set, enforce it.
-    // Otherwise any signed-in user gets admin access (demo mode).
-    const adminId = process.env.NEXT_PUBLIC_ADMIN_USER_ID
+    // Parse NEXT_PUBLIC_ADMIN_USER_IDS (comma-separated) or fall back to old single var
+    const rawIds = process.env.NEXT_PUBLIC_ADMIN_USER_IDS || process.env.NEXT_PUBLIC_ADMIN_USER_ID || ""
+    const adminIds = new Set(rawIds.split(",").map((id) => id.trim()).filter(Boolean))
+
     const isSignedIn = !!user
-    const isAdmin = adminId
-        ? (user?.id === adminId)
-        : isSignedIn   // ← demo mode: any signed-in user
+    // If no admin IDs configured → deny all (fail-secure)
+    // If configured → check if current user's ID is in the set
+    const isAdmin = adminIds.size > 0 ? adminIds.has(user?.id) : false
 
     if (!isSignedIn) {
         return (
