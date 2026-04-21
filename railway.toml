@@ -1,0 +1,15 @@
+# Railway Deployment Configuration
+# This file tells Railway how to build and run the app.
+# It is picked up automatically when you connect your GitHub repo to Railway.
+
+[build]
+builder = "nixpacks"
+buildCommand = "npm run build"
+
+[deploy]
+startCommand = "npm run start"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
+
+[[services]]
+name = "gocart-web"

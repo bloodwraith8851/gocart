@@ -4,21 +4,11 @@ const nextConfig = {
         unoptimized: true,
     },
 
-    // ── Turbopack (default in Next 15 dev) — already fast but ensure it's on
-    // This is the default in Next 15, listed here for clarity
-
-    // ── Experimental optimizations ──────────────────────────────────────────
     experimental: {
-        // Eagerly compile all pages on dev server start instead of on first visit.
-        // Eliminates the 5-30s "○ Compiling /admin..." spikes you see in the logs.
-        // Trade-off: slightly slower initial `npm run dev` start, but ZERO compile
-        // wait when navigating to any page.
-        webpackBuildWorker: true,
-
-        // Enable instrumentation.js (runs once at server start for DB warm-up)
+        // Enable instrumentation.js (DB warm-up at server start)
         instrumentationHook: true,
 
-        // Reduce JS bundle size by not including unused Turbopack chunks early
+        // Tree-shake heavy packages — reduces per-page bundle size significantly
         optimizePackageImports: [
             "lucide-react",
             "recharts",
@@ -28,13 +18,16 @@ const nextConfig = {
         ],
     },
 
-    // ── Compiler options ────────────────────────────────────────────────────
+    // Strip console.log from production bundle (keep warn/error)
     compiler: {
-        // Remove console.log in production
         removeConsole: process.env.NODE_ENV === "production"
             ? { exclude: ["error", "warn"] }
             : false,
     },
+
+    // Required for Railway — listens on the PORT env var Railway provides
+    // Next.js reads this automatically via `next start -p $PORT`
+    // (Railway sets PORT=8080 by default)
 };
 
 export default nextConfig;

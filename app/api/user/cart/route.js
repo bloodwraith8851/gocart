@@ -13,7 +13,7 @@ export async function POST(request) {
         await prisma.user.upsert({
             where: { id: userId },
             update: { cart: cart || {} },
-            create: { id: userId, cart: cart || {}, name: "User", email: "" },
+            create: { id: userId, cart: cart || {}, name: "User", email: "", image: "" },
         });
 
         return NextResponse.json({ message: "cart synced" });
