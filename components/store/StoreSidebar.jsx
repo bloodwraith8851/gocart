@@ -2,13 +2,14 @@
 import { usePathname } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { HomeIcon, LayoutListIcon, SquarePenIcon, SquarePlusIcon, ArrowLeftIcon, StoreIcon } from "lucide-react"
+import { HomeIcon, LayoutListIcon, SquarePenIcon, SquarePlusIcon, ArrowLeftIcon, StoreIcon, SettingsIcon } from "lucide-react"
 
 const LINKS = [
-    { name: "Dashboard",       href: "/store",                Icon: HomeIcon,       color: "#0071e3" },
-    { name: "Add Product",     href: "/store/add-product",    Icon: SquarePlusIcon, color: "#34c759" },
-    { name: "Manage Products", href: "/store/manage-product", Icon: SquarePenIcon,  color: "#5ac8fa" },
-    { name: "Orders",          href: "/store/orders",         Icon: LayoutListIcon, color: "#ff9500" },
+    { name: "Dashboard",       href: "/store",                 Icon: HomeIcon,       color: "#0071e3" },
+    { name: "Add Product",     href: "/store/add-product",     Icon: SquarePlusIcon, color: "#34c759" },
+    { name: "Manage Products", href: "/store/manage-product",  Icon: SquarePenIcon,  color: "#5ac8fa" },
+    { name: "Orders",          href: "/store/orders",          Icon: LayoutListIcon, color: "#ff9500" },
+    { name: "Settings",        href: "/store/settings",        Icon: SettingsIcon,   color: "#bf5af2" },
 ]
 
 export default function StoreSidebar({ storeInfo }) {

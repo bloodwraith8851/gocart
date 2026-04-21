@@ -8,6 +8,7 @@ import Banner from "@/components/Banner"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import { useUser } from "@clerk/nextjs"
+import { WishlistProvider } from "@/contexts/WishlistContext"
 
 // ─── Module-level product cache (survives route changes, cleared after 60 s) ───────────────────
 let productCache    = null
@@ -108,11 +109,11 @@ export default function PublicLayout({ children }) {
     }, [cartItems, user, isLoaded])
 
     return (
-        <>
+        <WishlistProvider>
             <Banner />
             <Navbar />
             <main>{children}</main>
             <Footer />
-        </>
+        </WishlistProvider>
     )
 }

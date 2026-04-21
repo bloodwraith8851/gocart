@@ -1,13 +1,16 @@
 'use client'
-import { StarIcon } from 'lucide-react'
+import { StarIcon, HeartIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useWishlist } from '@/contexts/WishlistContext'
 
 const ProductCard = ({ product, dark = false }) => {
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$'
     const [hovered,   setHovered]   = useState(false)
     const [imgLoaded, setImgLoaded] = useState(false)
+    const { toggle, isWishlisted }  = useWishlist()
+    const wishlisted = isWishlisted(product.id)
 
     const avgRating = product.rating?.length > 0
         ? Math.round(product.rating.reduce((a, c) => a + c.rating, 0) / product.rating.length)
@@ -23,6 +26,12 @@ const ProductCard = ({ product, dark = false }) => {
     const subText   = dark ? "rgba(255,255,255,0.48)" : "rgba(0,0,0,0.48)"
     const strikeClr = dark ? "rgba(255,255,255,0.32)" : "rgba(0,0,0,0.36)"
     const learnClr  = dark ? "#2997ff" : "#0066cc"
+
+    const isNew = (() => {
+        if (!product.createdAt) return false
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        return new Date(product.createdAt) > sevenDaysAgo
+    })()
 
     return (
         <Link
@@ -65,7 +74,7 @@ const ProductCard = ({ product, dark = false }) => {
                     }}
                 />
 
-                {/* Discount badge */}
+                {/* Discount badge — top left */}
                 {discount && discount > 0 && (
                     <div style={{
                         position: "absolute", top: "10px", left: "10px",
@@ -75,6 +84,19 @@ const ProductCard = ({ product, dark = false }) => {
                         letterSpacing: "-0.2px",
                     }}>
                         -{discount}%
+                    </div>
+                )}
+
+                {/* NEW badge — top right */}
+                {isNew && (
+                    <div style={{
+                        position: "absolute", top: "10px", right: "10px",
+                        backgroundColor: "#34c759", color: "#fff",
+                        fontSize: "10px", fontWeight: 800,
+                        padding: "3px 9px", borderRadius: "980px",
+                        letterSpacing: "0.04em", textTransform: "uppercase",
+                    }}>
+                        New
                     </div>
                 )}
 
@@ -90,6 +112,30 @@ const ProductCard = ({ product, dark = false }) => {
                         </span>
                     </div>
                 )}
+
+                {/* Heart — wishlist button */}
+                <button
+                    onClick={(e) => { e.preventDefault(); toggle(product); }}
+                    style={{
+                        position: "absolute", bottom: "10px", right: "10px",
+                        width: "32px", height: "32px", borderRadius: "50%",
+                        backgroundColor: wishlisted ? "rgba(255,59,48,0.15)" : "rgba(0,0,0,0.25)",
+                        border: `1px solid ${wishlisted ? "rgba(255,59,48,0.4)" : "rgba(255,255,255,0.15)"}`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        cursor: "pointer", backdropFilter: "blur(8px)",
+                        transition: "transform 0.2s, background-color 0.2s",
+                        opacity: hovered || wishlisted ? 1 : 0,
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.15)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+                    title={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                >
+                    <HeartIcon size={14} style={{
+                        fill: wishlisted ? "#ff3b30" : "none",
+                        color: wishlisted ? "#ff3b30" : "#fff",
+                        transition: "fill 0.2s, color 0.2s",
+                    }} />
+                </button>
             </div>
 
             {/* Info */}

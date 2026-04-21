@@ -1,6 +1,7 @@
 'use client'
 import ProductDescription from "@/components/ProductDescription";
 import ProductDetails from "@/components/ProductDetails";
+import ProductCard from "@/components/ProductCard";
 import RatingModal from "@/components/RatingModal";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -20,6 +21,13 @@ export default function Product() {
         }
         window.scrollTo(0, 0);
     }, [productId, products]);
+
+    // Related products — same category, exclude current
+    const related = product
+        ? products
+            .filter((p) => p.category === product.category && p.id !== product.id && p.inStock)
+            .slice(0, 4)
+        : [];
 
     // Skeleton while products load
     if (!product && products.length === 0) {
@@ -75,6 +83,29 @@ export default function Product() {
                         <ProductDetails product={product} />
                         <ProductDescription product={product} setRatingModal={setRatingModal} />
                     </>
+                )}
+
+                {/* Related Products */}
+                {related.length > 0 && (
+                    <div style={{ marginTop: "64px", paddingTop: "48px", borderTop: "1px solid rgba(0,0,0,0.07)" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "28px" }}>
+                            <div>
+                                <h2 style={{ fontFamily: "'Inter',sans-serif", fontSize: "22px", fontWeight: 700, color: "#1d1d1f", letterSpacing: "-0.3px" }}>
+                                    You May Also Like
+                                </h2>
+                                <p style={{ fontSize: "13px", color: "rgba(0,0,0,0.44)", marginTop: "3px" }}>
+                                    More in {product?.category}
+                                </p>
+                            </div>
+                            <Link href={`/shop?search=${product?.category}`}
+                                style={{ fontSize: "14px", color: "#0066cc", fontWeight: 500, textDecoration: "none" }}>
+                                See all ›
+                            </Link>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))", gap: "20px" }}>
+                            {related.map((p) => <ProductCard key={p.id} product={p} />)}
+                        </div>
+                    </div>
                 )}
             </div>
 

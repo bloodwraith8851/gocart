@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useUser, useClerk, UserButton } from "@clerk/nextjs";
-import { Search, ShoppingBag, X, PackageIcon } from "lucide-react";
+import { Search, ShoppingBag, X, PackageIcon, HeartIcon } from "lucide-react";
+import { useWishlist } from "@/contexts/WishlistContext";
 
 const GLASS = {
     backgroundColor: "rgba(10,10,10,0.88)",
@@ -28,7 +29,9 @@ export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
 
-    const cartCount = useSelector((s) => s.cart.total ?? 0);
+    const cartCount     = useSelector((s) => s.cart.total ?? 0);
+    const { wishlist }  = useWishlist();
+    const wishlistCount = wishlist.length;
 
     // close mobile menu on route change
     useEffect(() => { setMobileOpen(false); }, []);
@@ -86,6 +89,16 @@ export default function Navbar() {
                         <button onClick={() => setSearchOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", display: "flex", padding: "4px" }} aria-label="Search">
                             <Search size={17} />
                         </button>
+
+                        {/* Wishlist */}
+                        <Link href="/wishlist" style={{ position: "relative", color: "rgba(255,255,255,0.7)", display: "inline-flex", padding: "4px" }} aria-label="Wishlist">
+                            <HeartIcon size={17} style={{ fill: wishlistCount > 0 ? "#ff3b30" : "none", color: wishlistCount > 0 ? "#ff3b30" : "rgba(255,255,255,0.7)", transition: "fill 0.2s, color 0.2s" }} />
+                            {wishlistCount > 0 && (
+                                <span style={{ position: "absolute", top: "-5px", right: "-5px", minWidth: "14px", height: "14px", backgroundColor: "#ff3b30", borderRadius: "7px", fontSize: "9px", fontWeight: 800, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>
+                                    {wishlistCount > 99 ? "99+" : wishlistCount}
+                                </span>
+                            )}
+                        </Link>
 
                         {/* Cart */}
                         <Link href="/cart" style={{ position: "relative", color: "rgba(255,255,255,0.7)", display: "inline-flex" }} aria-label="Cart">
