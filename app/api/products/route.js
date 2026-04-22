@@ -31,6 +31,7 @@ export async function GET() {
             where:   { inStock: true, store: { isActive: true } },
             select:  PRODUCT_SELECT,
             orderBy: { createdAt: "desc" },
+            take:    100, // UX optimization: limit global fetch payload
         });
 
         return NextResponse.json(

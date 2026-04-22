@@ -5,8 +5,30 @@ import { useSelector } from 'react-redux'
 import Link from 'next/link'
 import Image from 'next/image'
 import { StarIcon, ArrowRightIcon } from 'lucide-react'
+import { useRef, useLayoutEffect } from 'react'
+import { gsap } from '@/lib/gsap'
+import { fadeUp, staggerCards } from '@/hooks/useScrollAnimation'
 
-// Large hero-style featured card (first product)
+function FeaturedSkeleton() {
+    return (
+        <div className="skeleton" style={{
+            gridColumn: "span 2", borderRadius: "20px", display: "flex", flexDirection: "column",
+            justifyContent: "space-between", minHeight: "280px", position: "relative",
+            overflow: "hidden", padding: "40px"
+        }}>
+            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "20px", height: "100%" }}>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "16px", marginTop: "auto" }}>
+                    <div style={{ width: "120px", height: "24px", borderRadius: "980px", backgroundColor: "rgba(0,0,0,0.05)" }} />
+                    <div style={{ width: "70%", height: "24px", borderRadius: "6px", backgroundColor: "rgba(0,0,0,0.05)" }} />
+                    <div style={{ width: "90%", height: "14px", borderRadius: "6px", backgroundColor: "rgba(0,0,0,0.05)" }} />
+                    <div style={{ width: "80%", height: "14px", borderRadius: "6px", backgroundColor: "rgba(0,0,0,0.05)" }} />
+                </div>
+                <div style={{ width: "160px", height: "180px", flexShrink: 0, backgroundColor: "rgba(0,0,0,0.05)", borderRadius: "14px" }} />
+            </div>
+        </div>
+    )
+}
+
 function FeaturedCard({ product }) {
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$'
     const avgRating = product.rating?.length > 0
@@ -16,7 +38,7 @@ function FeaturedCard({ product }) {
         ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : null
 
     return (
-        <Link href={`/product/${product.id}`} style={{ textDecoration: "none", display: "block", gridColumn: "span 2" }}>
+        <Link href={`/product/${product.id}`} className="bestselling-product-el" style={{ textDecoration: "none", display: "block", gridColumn: "span 2" }}>
             <div style={{
                 backgroundColor: "#f0f0f5",
                 borderRadius: "20px",
@@ -77,7 +99,7 @@ function FeaturedCard({ product }) {
 
                     {/* Product image */}
                     <div style={{ width: "160px", height: "180px", flexShrink: 0, position: "relative" }}>
-                        <Image src={product.images[0]} alt={product.name} fill sizes="160px"
+                        <Image src={product.images[0]} alt={product.name} fill sizes="160px" loading="lazy"
                             style={{ objectFit: "contain", filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.15))" }} />
                     </div>
                 </div>
@@ -88,6 +110,8 @@ function FeaturedCard({ product }) {
 
 const BestSelling = () => {
     const { list: products, loading } = useSelector((state) => state.product)
+    const sectionRef = useRef(null)
+    const headerRef = useRef(null)
 
     const sorted = [...products]
         .sort((a, b) => (b.rating?.length || 0) - (a.rating?.length || 0))
@@ -96,11 +120,22 @@ const BestSelling = () => {
     const featured = sorted[0]
     const rest     = sorted.slice(1, 7)
 
+    useLayoutEffect(() => {
+        if (!loading && sorted.length > 0 && sectionRef.current) {
+            const ctx = gsap.context(() => {
+                fadeUp(headerRef, { y: 30 })
+                staggerCards('.bestselling-product-el', sectionRef)
+            }, sectionRef)
+            return () => ctx.revert()
+        }
+    }, [loading, sorted.length])
+
+
     return (
-        <section style={{ backgroundColor: "#f5f5f7" }}>
+        <section ref={sectionRef} style={{ backgroundColor: "#f5f5f7" }}>
             <div style={{ maxWidth: "980px", margin: "0 auto", padding: "80px 20px" }}>
                 {/* Header */}
-                <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "20px", marginBottom: "48px" }}>
+                <div ref={headerRef} style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "20px", marginBottom: "48px", opacity: 0 }}>
                     <div>
                         <p style={{ fontSize: "11px", fontWeight: 700, color: "#0071e3", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "8px" }}>Top Picks</p>
                         <h2 style={{ fontFamily: "'Inter',sans-serif", fontSize: "clamp(1.75rem,3vw,2.5rem)", fontWeight: 800, color: "#1d1d1f", lineHeight: 1.05, letterSpacing: "-0.5px" }}>
@@ -110,14 +145,18 @@ const BestSelling = () => {
                             {loading ? "Loading…" : `${sorted.length} most popular products`}
                         </p>
                     </div>
-                    <Link href="/shop" style={{ fontSize: "13px", color: "#0066cc", textDecoration: "none", whiteSpace: "nowrap", border: "1px solid rgba(0,102,204,0.4)", borderRadius: "980px", padding: "7px 18px" }}>
+                    <Link href="/shop" style={{ fontSize: "13px", color: "#0066cc", textDecoration: "none", whiteSpace: "nowrap", border: "1px solid rgba(0,102,204,0.4)", borderRadius: "980px", padding: "7px 18px", transition: "background-color 0.2s" }} onMouseEnter={e => e.currentTarget.style.backgroundColor = "rgba(0,102,204,0.1)"} onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}>
                         See all ›
                     </Link>
                 </div>
 
                 {loading ? (
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "20px" }}>
-                        {Array(8).fill(null).map((_, i) => <SkeletonCard key={i} />)}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
+                            <FeaturedSkeleton />
+                            <SkeletonCard />
+                            <SkeletonCard />
+                        </div>
                     </div>
                 ) : sorted.length === 0 ? (
                     <div style={{ textAlign: "center", padding: "60px 0" }}>
@@ -130,14 +169,17 @@ const BestSelling = () => {
                         {featured && (
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "16px" }}>
                                 <FeaturedCard product={featured} />
-                                {rest.slice(0, 2).map((p) => <ProductCard key={p.id} product={p} />)}
+                                <div className="bestselling-product-el"><ProductCard product={rest[0]} /></div>
+                                <div className="bestselling-product-el"><ProductCard product={rest[1]} /></div>
                             </div>
                         )}
 
                         {/* Remaining grid */}
                         {rest.length > 2 && (
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "16px" }}>
-                                {rest.slice(2).map((p) => <ProductCard key={p.id} product={p} />)}
+                                {rest.slice(2).map((p) => (
+                                    <div key={p.id} className="bestselling-product-el"><ProductCard product={p} /></div>
+                                ))}
                             </div>
                         )}
                     </>

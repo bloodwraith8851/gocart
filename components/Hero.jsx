@@ -2,8 +2,9 @@
 import Image from "next/image"
 import Link from "next/link"
 import { assets } from "@/assets/assets"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useLayoutEffect } from "react"
 import { ShieldCheckIcon, StarIcon, ZapIcon } from "lucide-react"
+import { gsap } from "@/lib/gsap"
 
 const STATS = [
     { label: "Products",    value: "10K+" },
@@ -19,21 +20,30 @@ const TRUST = [
 ]
 
 export default function Hero() {
-    const [loaded, setLoaded] = useState(false)
+    const heroRef = useRef(null)
 
-    useEffect(() => {
-        const t = setTimeout(() => setLoaded(true), 80)
-        return () => clearTimeout(t)
+    useLayoutEffect(() => {
+        const ctx = gsap.context(() => {
+            const tl = gsap.timeline({ defaults: { ease: "power3.out" } })
+            
+            // Text Animations
+            tl.from('.hero-badge', { y: 20, opacity: 0, duration: 0.6 })
+              .from('.hero-headline-word', { y: 40, opacity: 0, duration: 0.8, stagger: 0.1, rotationX: -20, transformOrigin: "0% 50% -50" }, "-=0.2")
+              .from('.hero-subtitle', { y: 20, opacity: 0, duration: 0.6 }, "-=0.4")
+              .from('.hero-btn', { y: 20, opacity: 0, duration: 0.5, stagger: 0.1 }, "-=0.3")
+              .from('.hero-trust', { opacity: 0, x: -10, duration: 0.5, stagger: 0.1 }, "-=0.3")
+              .from('.hero-stat', { opacity: 0, y: 15, duration: 0.5, stagger: 0.1 }, "-=0.3")
+
+            // Image & floating cards
+            tl.fromTo('.hero-main-img', { scale: 0.8, opacity: 0, rotation: -5 }, { scale: 1, opacity: 1, rotation: 0, duration: 1, ease: 'back.out(1.2)' }, 0.2)
+              .from('.hero-floating-card', { y: 60, opacity: 0, duration: 0.8, stagger: 0.15, rotationY: 45, ease: 'back.out(1.5)' }, 0.5)
+
+        }, heroRef)
+        return () => ctx.revert()
     }, [])
 
-    const anim = (delay = 0, dx = 0, dy = 20) => ({
-        opacity:    loaded ? 1 : 0,
-        transform:  loaded ? "translate(0,0)" : `translate(${dx}px,${dy}px)`,
-        transition: `opacity 0.7s ease ${delay}s, transform 0.7s ease ${delay}s`,
-    })
-
     return (
-        <section style={{ backgroundColor: "#000", minHeight: "88vh", display: "flex", alignItems: "center", position: "relative", overflow: "hidden" }}>
+        <section ref={heroRef} style={{ backgroundColor: "#000", minHeight: "88vh", display: "flex", alignItems: "center", position: "relative", overflow: "hidden" }}>
 
             {/* ── BACKGROUND EFFECTS ── */}
             <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
@@ -48,21 +58,20 @@ export default function Hero() {
             </div>
 
             {/* ── CONTENT ── */}
-            <div style={{ maxWidth: "1020px", margin: "0 auto", padding: "80px 24px", width: "100%", position: "relative" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "48px", flexWrap: "wrap" }}>
+            <div style={{ maxWidth: "1020px", margin: "0 auto", padding: "80px 24px", width: "100%", position: "relative", perspective: "1000px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "48px", flexWrap: "wrap", perspective: "1000px" }}>
 
                     {/* LEFT — Text */}
                     <div style={{ flex: "1 1 380px", maxWidth: "540px" }}>
 
                         {/* Pill badge */}
-                        <div style={{ ...anim(0.0), display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(0,113,227,0.1)", border: "1px solid rgba(0,113,227,0.28)", borderRadius: "980px", padding: "6px 16px", marginBottom: "28px" }}>
+                        <div className="hero-badge" style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(0,113,227,0.1)", border: "1px solid rgba(0,113,227,0.28)", borderRadius: "980px", padding: "6px 16px", marginBottom: "28px" }}>
                             <span style={{ width: "6px", height: "6px", backgroundColor: "#0071e3", borderRadius: "50%", animation: "dotPulse 2s ease infinite" }} />
                             <span style={{ fontSize: "11px", color: "#2997ff", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>New Arrivals Every Day</span>
                         </div>
 
                         {/* Headline */}
                         <h1 style={{
-                            ...anim(0.12),
                             fontFamily: "'Inter', sans-serif",
                             fontSize: "clamp(2.8rem,5.5vw,5rem)",
                             fontWeight: 900,
@@ -70,26 +79,26 @@ export default function Hero() {
                             letterSpacing: "-2.5px",
                             marginBottom: "24px",
                         }}>
-                            <span style={{ color: "#fff", display: "block" }}>Gadgets</span>
-                            <span style={{ background: "linear-gradient(135deg, #0071e3 0%, #2997ff 45%, #a78bfa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", display: "block" }}>you'll love.</span>
-                            <span style={{ color: "rgba(255,255,255,0.38)", display: "block" }}>Prices you'll trust.</span>
+                            <div style={{ overflow: "hidden" }}><span className="hero-headline-word" style={{ color: "#fff", display: "inline-block" }}>Gadgets</span></div>
+                            <div style={{ overflow: "hidden" }}><span className="hero-headline-word" style={{ background: "linear-gradient(135deg, #0071e3 0%, #2997ff 45%, #a78bfa 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", display: "inline-block" }}>you'll love.</span></div>
+                            <div style={{ overflow: "hidden" }}><span className="hero-headline-word" style={{ color: "rgba(255,255,255,0.38)", display: "inline-block" }}>Prices you'll trust.</span></div>
                         </h1>
 
                         {/* Subtitle */}
-                        <p style={{ ...anim(0.28), fontSize: "18px", color: "rgba(255,255,255,0.52)", lineHeight: 1.65, maxWidth: "400px", marginBottom: "40px" }}>
+                        <p className="hero-subtitle" style={{ fontSize: "18px", color: "rgba(255,255,255,0.52)", lineHeight: 1.65, maxWidth: "400px", marginBottom: "40px" }}>
                             The smartest multi-vendor marketplace — curated sellers, honest prices, blazing fast shipping to your door.
                         </p>
 
                         {/* CTA Buttons */}
-                        <div style={{ ...anim(0.42), display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "48px" }}>
-                            <Link href="/shop"
+                        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "48px" }}>
+                            <Link href="/shop" className="hero-btn"
                                 style={{ backgroundColor: "#0071e3", color: "#fff", textDecoration: "none", borderRadius: "980px", padding: "15px 34px", fontSize: "16px", fontWeight: 700, display: "inline-block", boxShadow: "0 0 40px rgba(0,113,227,0.45)", transition: "transform 0.18s ease, box-shadow 0.18s ease" }}
                                 onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; e.currentTarget.style.boxShadow = "0 0 60px rgba(0,113,227,0.65)"; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 0 40px rgba(0,113,227,0.45)"; }}
                             >
                                 🛍 Shop Now
                             </Link>
-                            <Link href="/pricing"
+                            <Link href="/pricing" className="hero-btn"
                                 style={{ backgroundColor: "rgba(255,255,255,0.06)", color: "#fff", textDecoration: "none", borderRadius: "980px", padding: "15px 28px", fontSize: "16px", fontWeight: 500, border: "1px solid rgba(255,255,255,0.18)", transition: "background-color 0.18s, border-color 0.18s" }}
                                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.36)"; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.06)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)"; }}
@@ -99,9 +108,9 @@ export default function Hero() {
                         </div>
 
                         {/* Trust badges */}
-                        <div style={{ ...anim(0.55), display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "36px" }}>
+                        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "36px" }}>
                             {TRUST.map(({ Icon, text }) => (
-                                <div key={text} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                <div key={text} className="hero-trust" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                                     <Icon size={13} style={{ color: "#0071e3" }} />
                                     <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.45)", fontWeight: 500 }}>{text}</span>
                                 </div>
@@ -109,9 +118,9 @@ export default function Hero() {
                         </div>
 
                         {/* Stats row */}
-                        <div style={{ ...anim(0.65), display: "flex", gap: "28px", flexWrap: "wrap", paddingTop: "28px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+                        <div style={{ display: "flex", gap: "28px", flexWrap: "wrap", paddingTop: "28px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
                             {STATS.map((s) => (
-                                <div key={s.label}>
+                                <div key={s.label} className="hero-stat">
                                     <p style={{ fontSize: "24px", fontWeight: 900, color: "#fff", lineHeight: 1, letterSpacing: "-0.5px" }}>{s.value}</p>
                                     <p style={{ fontSize: "11px", color: "rgba(255,255,255,0.38)", marginTop: "4px", textTransform: "uppercase", letterSpacing: "0.06em" }}>{s.label}</p>
                                 </div>
@@ -120,20 +129,20 @@ export default function Hero() {
                     </div>
 
                     {/* RIGHT — Hero image with badges */}
-                    <div style={{ ...anim(0.2, 40, 0), flex: "0 0 auto", position: "relative", display: "flex", justifyContent: "center" }}>
+                    <div style={{ flex: "0 0 auto", position: "relative", display: "flex", justifyContent: "center" }}>
 
                         {/* Background glow disc */}
-                        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "380px", height: "380px", background: "radial-gradient(circle, rgba(0,113,227,0.28) 0%, rgba(139,92,246,0.12) 50%, transparent 75%)", borderRadius: "50%", filter: "blur(32px)", animation: "heroGlow 6s ease-in-out infinite" }} />
+                        <div className="hero-main-img" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "380px", height: "380px", background: "radial-gradient(circle, rgba(0,113,227,0.28) 0%, rgba(139,92,246,0.12) 50%, transparent 75%)", borderRadius: "50%", filter: "blur(32px)", animation: "heroGlow 6s ease-in-out infinite" }} />
 
                         {/* Main image */}
-                        <div style={{ position: "relative", width: "280px", animation: "heroFloat 6s ease-in-out infinite" }}>
+                        <div className="hero-main-img" style={{ position: "relative", width: "280px", animation: "heroFloat 6s ease-in-out infinite 1s" }}>
                             <Image src={assets.hero_model_img} alt="GoCart hero" width={300} height={420}
                                 priority
                                 style={{ objectFit: "contain", width: "100%", height: "auto", filter: "drop-shadow(0 24px 56px rgba(0,113,227,0.35))" }} />
                         </div>
 
                         {/* Floating card 1 — product */}
-                        <div style={{
+                        <div className="hero-floating-card" style={{
                             position: "absolute", top: "8%", left: "-60px",
                             backgroundColor: "rgba(18,18,20,0.8)", backdropFilter: "blur(20px)",
                             border: "1px solid rgba(255,255,255,0.1)", borderRadius: "16px",
@@ -155,7 +164,7 @@ export default function Hero() {
                         </div>
 
                         {/* Floating badge 2 — save% */}
-                        <div style={{
+                        <div className="hero-floating-card" style={{
                             position: "absolute", bottom: "25%", right: "-40px",
                             background: "linear-gradient(135deg, #0071e3, #a78bfa)",
                             borderRadius: "14px", padding: "12px 18px", textAlign: "center",
@@ -168,7 +177,7 @@ export default function Hero() {
                         </div>
 
                         {/* Floating badge 3 — free shipping */}
-                        <div style={{
+                        <div className="hero-floating-card" style={{
                             position: "absolute", bottom: "8%", left: "-30px",
                             backgroundColor: "rgba(52,199,89,0.15)",
                             border: "1px solid rgba(52,199,89,0.35)",

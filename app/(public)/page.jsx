@@ -11,17 +11,30 @@ const OurSpecs          = dynamic(() => import("@/components/OurSpec"),         
 const Newsletter        = dynamic(() => import("@/components/Newsletter"),        { ssr: false })
 
 // Lightweight section placeholder shown until the section enters the viewport
+// Lightweight section placeholder shown until the section enters the viewport
 function SectionSkeleton({ height = 400, dark = false }) {
     return (
         <div style={{
             minHeight: height,
             backgroundColor: dark ? "#000" : "#f5f5f7",
-            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "80px 20px"
         }}>
-            <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", justifyContent: "center", padding: "20px" }}>
-                {Array(4).fill(null).map((_, i) => (
-                    <div key={i} className={dark ? "skeleton-dark" : "skeleton"} style={{ width: "200px", height: "260px", borderRadius: "14px" }} />
-                ))}
+            <div style={{ maxWidth: "980px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "40px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+                    <div>
+                        <div className={dark ? "skeleton-dark" : "skeleton"} style={{ width: "80px", height: "12px", borderRadius: "980px", marginBottom: "12px" }} />
+                        <div className={dark ? "skeleton-dark" : "skeleton"} style={{ width: "240px", height: "36px", borderRadius: "8px" }} />
+                    </div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "20px" }}>
+                    {Array(4).fill(null).map((_, i) => (
+                        <div key={i} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                            <div className={dark ? "skeleton-dark" : "skeleton"} style={{ aspectRatio: "1/1", borderRadius: "14px" }} />
+                            <div className={dark ? "skeleton-dark" : "skeleton"} style={{ height: "14px", width: "80%", borderRadius: "5px" }} />
+                            <div className={dark ? "skeleton-dark" : "skeleton"} style={{ height: "14px", width: "60%", borderRadius: "5px" }} />
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     )

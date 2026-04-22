@@ -1,4 +1,7 @@
+'use client'
 import { TruckIcon, ShieldCheckIcon, HeadsetIcon, RotateCcwIcon } from 'lucide-react'
+import { useRef, useLayoutEffect } from 'react'
+import { gsap } from '@/lib/gsap'
 
 const SPECS = [
     { Icon: TruckIcon,       title: "Free Worldwide Shipping",  description: "No minimum order. Fast, tracked delivery to 180+ countries — always on us.", gradient: "linear-gradient(135deg, #0071e3, #2997ff)" },
@@ -8,14 +11,39 @@ const SPECS = [
 ]
 
 const OurSpec = () => {
+    const sectionRef = useRef(null)
+
+    useLayoutEffect(() => {
+        const ctx = gsap.context(() => {
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: sectionRef.current,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                }
+            })
+
+            tl.fromTo('.spec-header', 
+                { y: 30, opacity: 0 }, 
+                { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
+            )
+            .fromTo('.spec-card',
+                { y: 40, opacity: 0, scale: 0.95 },
+                { y: 0, opacity: 1, scale: 1, duration: 0.6, stagger: 0.15, ease: "back.out(1.2)" },
+                "-=0.4"
+            )
+        }, sectionRef)
+        return () => ctx.revert()
+    }, [])
+
     return (
-        <section style={{ backgroundColor: "#1d1d1f", position: "relative", overflow: "hidden" }}>
+        <section ref={sectionRef} style={{ backgroundColor: "#1d1d1f", position: "relative", overflow: "hidden" }}>
             {/* Background accent */}
             <div style={{ position: "absolute", top: "-100px", right: "-100px", width: "500px", height: "500px", background: "radial-gradient(circle, rgba(0,113,227,0.07) 0%, transparent 65%)", pointerEvents: "none" }} />
 
             <div style={{ maxWidth: "980px", margin: "0 auto", padding: "96px 20px", position: "relative" }}>
                 {/* Title */}
-                <div style={{ textAlign: "center", marginBottom: "64px" }}>
+                <div className="spec-header" style={{ textAlign: "center", marginBottom: "64px" }}>
                     <p style={{ fontSize: "11px", fontWeight: 700, color: "#0071e3", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "10px" }}>
                         Why Choose Us
                     </p>
@@ -32,6 +60,7 @@ const OurSpec = () => {
                     {SPECS.map(({ Icon, title, description, gradient }) => (
                         <div
                             key={title}
+                            className="spec-card"
                             style={{ backgroundColor: "#272729", borderRadius: "16px", padding: "28px 22px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "16px", border: "1px solid rgba(255,255,255,0.05)", transition: "transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease", cursor: "default" }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.transform = "translateY(-6px)";

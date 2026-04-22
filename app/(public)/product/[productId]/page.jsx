@@ -3,6 +3,7 @@ import ProductDescription from "@/components/ProductDescription";
 import ProductDetails from "@/components/ProductDetails";
 import ProductCard from "@/components/ProductCard";
 import RatingModal from "@/components/RatingModal";
+import RecentlyViewed, { pushRecentView } from "@/components/RecentlyViewed";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -18,6 +19,7 @@ export default function Product() {
         if (products.length > 0) {
             const found = products.find((p) => p.id === productId);
             setProduct(found || null);
+            if (found) pushRecentView(found.id);
         }
         window.scrollTo(0, 0);
     }, [productId, products]);
@@ -87,7 +89,7 @@ export default function Product() {
 
                 {/* Related Products */}
                 {related.length > 0 && (
-                    <div style={{ marginTop: "64px", paddingTop: "48px", borderTop: "1px solid rgba(0,0,0,0.07)" }}>
+                    <div style={{ marginTop: "64px", paddingTop: "48px", borderTop: "1px solid rgba(0,0,0,0.07)", paddingBottom: "48px" }}>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "28px" }}>
                             <div>
                                 <h2 style={{ fontFamily: "'Inter',sans-serif", fontSize: "22px", fontWeight: 700, color: "#1d1d1f", letterSpacing: "-0.3px" }}>
@@ -108,6 +110,8 @@ export default function Product() {
                     </div>
                 )}
             </div>
+
+            <RecentlyViewed />
 
             {ratingModal && <RatingModal ratingModal={ratingModal} setRatingModal={setRatingModal} />}
         </div>

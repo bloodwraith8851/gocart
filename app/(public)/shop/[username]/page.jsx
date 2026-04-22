@@ -1,117 +1,164 @@
 'use client'
-import ProductCard from "@/components/ProductCard"
-import SkeletonCard from "@/components/SkeletonCard"
-import { useParams } from "next/navigation"
-import { useEffect, useState } from "react"
-import { MailIcon, MapPinIcon, PhoneIcon } from "lucide-react"
-import Image from "next/image"
+import { useParams } from 'next/navigation'
+import { useEffect, useState, useRef } from 'react'
+import { useSelector } from 'react-redux'
+import Image from 'next/image'
+import ProductCard from '@/components/ProductCard'
+import { gsap } from '@/lib/gsap'
+import { useScrollAnimation, parallax, staggerCards } from '@/hooks/useScrollAnimation'
+import toast from 'react-hot-toast'
+import SkeletonCard from '@/components/SkeletonCard'
+import { MapPin, CalendarDays, Store as StoreIcon } from 'lucide-react'
 
-export default function StoreShop() {
-    const { username }  = useParams()
-    const [products,   setProducts]   = useState([])
-    const [storeInfo,  setStoreInfo]  = useState(null)
-    const [loading,    setLoading]    = useState(true)
-    const [error,      setError]      = useState(null)
+export default function SellerStorePage() {
+    const { username } = useParams()
+    const { list: allProducts } = useSelector(state => state.product)
+    
+    const [store, setStore] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [following, setFollowing] = useState(false)
+
+    const bannerRef = useRef(null)
+    const gridRef = useRef(null)
 
     useEffect(() => {
-        ;(async () => {
-            try {
-                const res  = await fetch(`/api/store/data?username=${username}`)
-                const data = await res.json()
-                if (!res.ok) throw new Error(data.error || "Store not found")
-                setStoreInfo(data.store)
-                setProducts(data.store.Product || [])
-            } catch (err) {
-                setError(err.message)
-            } finally {
+        fetch(`/api/store/${username}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.store) setStore(data.store)
                 setLoading(false)
-            }
-        })()
+            })
+            .catch(err => {
+                console.error(err)
+                setLoading(false)
+            })
+            
+        // Check local storage for follow
+        if (typeof window !== 'undefined') {
+            const follows = JSON.parse(localStorage.getItem('gocart_follows') || '[]')
+            setFollowing(follows.includes(username))
+        }
     }, [username])
+
+    const storeProducts = store ? allProducts.filter(p => p.storeId === store.id) : []
+
+    // GSAP Parallax on Banner
+    useScrollAnimation((ref) => {
+        parallax(ref, { speed: 0.4 })
+    }, [])
+
+    useScrollAnimation((ref) => {
+        if (!loading) {
+            gsap.fromTo('.store-info-fade', 
+                { opacity: 0, y: 30 }, 
+                { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power2.out' }
+            )
+            if (gridRef.current) staggerCards('.product-card-el', gridRef)
+        }
+    }, [loading, storeProducts.length])
+
+    const toggleFollow = () => {
+        if (typeof window !== 'undefined') {
+            let follows = JSON.parse(localStorage.getItem('gocart_follows') || '[]')
+            if (following) {
+                follows = follows.filter(u => u !== username)
+                toast('Unfollowed store')
+            } else {
+                follows.push(username)
+                toast.success('Following store!')
+            }
+            localStorage.setItem('gocart_follows', JSON.stringify(follows))
+            setFollowing(!following)
+        }
+    }
 
     if (loading) {
         return (
-            <div className="max-w-[980px] mx-auto px-5 py-12">
-                <div className="skeleton rounded-xl mb-6" style={{ height: "180px" }} />
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {Array(8).fill(null).map((_, i) => <SkeletonCard key={i} />)}
+            <div style={{ minHeight: "80vh" }}>
+                <div className="skeleton" style={{ height: "300px", width: "100%" }} />
+                <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "40px 20px" }}>
+                    <div className="skeleton" style={{ width: "120px", height: "120px", borderRadius: "50%", marginTop: "-100px", marginBottom: "20px" }} />
+                    <div className="skeleton" style={{ height: "32px", width: "240px", marginBottom: "40px" }} />
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "24px" }}>
+                        {Array(8).fill(null).map((_, i) => <SkeletonCard key={i} />)}
+                    </div>
                 </div>
             </div>
         )
     }
 
-    if (error) {
+    if (!store) {
         return (
-            <div className="flex flex-col items-center justify-center text-center px-5" style={{ minHeight: "70vh" }}>
-                <p style={{ fontSize: "48px" }}>🏪</p>
-                <h1 style={{ fontSize: "28px", fontWeight: 600, color: "#1d1d1f", marginTop: "12px" }}>Store not found</h1>
-                <p className="text-caption mt-2" style={{ color: "rgba(0,0,0,0.48)" }}>{error}</p>
+            <div style={{ minHeight: "70vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+                <StoreIcon size={48} color="rgba(0,0,0,0.2)" style={{ marginBottom: "24px" }} />
+                <h1 style={{ fontSize: "28px", fontWeight: 800, marginBottom: "16px" }}>Store not found</h1>
+                <p style={{ color: "rgba(0,0,0,0.5)" }}>The seller profile you're looking for doesn't exist.</p>
             </div>
         )
     }
 
-    const inStock = products.filter((p) => p.inStock)
+    const joinYear = new Date(store.createdAt).getFullYear()
 
     return (
         <div style={{ minHeight: "80vh", backgroundColor: "#fff" }}>
-            {/* Store banner */}
-            {storeInfo && (
-                <div style={{ backgroundColor: "#f5f5f7", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-                    <div className="max-w-[980px] mx-auto px-5 py-10 flex flex-col md:flex-row items-center gap-6">
-                        {storeInfo.logo && (
-                            <Image
-                                src={storeInfo.logo}
-                                alt={storeInfo.name}
-                                width={96}
-                                height={96}
-                                className="rounded-2xl object-cover shrink-0"
-                                style={{ width: "96px", height: "96px", border: "1px solid rgba(0,0,0,0.08)" }}
-                            />
-                        )}
-                        <div className="text-center md:text-left flex-1">
-                            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "28px", fontWeight: 600, color: "#1d1d1f" }}>
-                                {storeInfo.name}
-                            </h1>
-                            <p className="text-caption mt-2" style={{ color: "rgba(0,0,0,0.56)", maxWidth: "480px" }}>
-                                {storeInfo.description}
-                            </p>
-                            <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-4">
-                                <span className="flex items-center gap-1 text-micro" style={{ color: "rgba(0,0,0,0.48)" }}>
-                                    <MapPinIcon size={12} /> {storeInfo.address}
-                                </span>
-                                <span className="flex items-center gap-1 text-micro" style={{ color: "rgba(0,0,0,0.48)" }}>
-                                    <MailIcon size={12} /> {storeInfo.email}
-                                </span>
-                            </div>
+            {/* Parallax Banner */}
+            <div style={{ height: "320px", overflow: "hidden", position: "relative", backgroundColor: "#1c1c1e" }}>
+                <div ref={bannerRef} style={{ position: "absolute", top: "-20%", left: "-10%", right: "-10%", bottom: "-20%", background: "radial-gradient(circle at center, #0071e3 0%, #000 70%)", opacity: 0.4 }} />
+                <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "160px", background: "linear-gradient(to top, #fff, transparent)" }} />
+            </div>
+
+            <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 20px 80px" }}>
+                {/* Store Header */}
+                <div style={{ position: "relative", marginTop: "-60px", marginBottom: "48px", display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: "24px" }}>
+                    <div className="store-info-fade" style={{ display: "flex", alignItems: "flex-end", gap: "24px" }}>
+                        <div style={{ width: "120px", height: "120px", borderRadius: "50%", backgroundColor: "#fff", border: "4px solid #fff", boxShadow: "0 8px 32px rgba(0,0,0,0.12)", overflow: "hidden", position: "relative", zIndex: 10 }}>
+                            <Image src={store.logo || '/default-avatar.png'} alt={store.name} fill style={{ objectFit: "cover" }} />
                         </div>
-                        <div style={{ textAlign: "right" }}>
-                            <p style={{ fontSize: "24px", fontWeight: 700, color: "#1d1d1f", lineHeight: 1 }}>
-                                {inStock.length}
-                            </p>
-                            <p className="text-micro" style={{ color: "rgba(0,0,0,0.48)", marginTop: "2px" }}>
-                                Products available
-                            </p>
+                        <div style={{ paddingBottom: "12px" }}>
+                            <h1 style={{ fontSize: "32px", fontWeight: 800, letterSpacing: "-1px", lineHeight: 1.1 }}>{store.name}</h1>
+                            <p style={{ fontSize: "15px", color: "rgba(0,0,0,0.5)", marginTop: "4px" }}>@{store.username}</p>
+                        </div>
+                    </div>
+
+                    <div className="store-info-fade" style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "16px", color: "rgba(0,0,0,0.5)", fontSize: "13px", fontWeight: 500 }}>
+                            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><MapPin size={14}/> {store.address || "Global"}</span>
+                            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><CalendarDays size={14}/> Joined {joinYear}</span>
+                        </div>
+                        <button 
+                            onClick={toggleFollow} 
+                            className={following ? "btn-ghost" : "btn-primary"} 
+                            style={following ? { borderColor: "#0071e3", color: "#0071e3", padding: "10px 24px"} : { padding: "10px 24px" }}
+                        >
+                            {following ? "Following" : "Follow Store"}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Main Content */}
+                <div style={{ display: "flex", gap: "48px", flexWrap: "wrap" }}>
+                    <aside className="store-info-fade" style={{ width: "300px", flexShrink: 0 }}>
+                        <h3 style={{ fontSize: "14px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "rgba(0,0,0,0.4)", marginBottom: "16px" }}>About</h3>
+                        <p style={{ fontSize: "15px", lineHeight: 1.6, color: "rgba(0,0,0,0.8)" }}>
+                            {store.description || "Welcome to our store! We offer high quality products and excellent customer service."}
+                        </p>
+                    </aside>
+
+                    <div style={{ flex: 1, minWidth: "300px" }}>
+                        <h3 className="store-info-fade" style={{ fontSize: "20px", fontWeight: 700, marginBottom: "24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            Store Products
+                            <span style={{ fontSize: "13px", fontWeight: 500, color: "rgba(0,0,0,0.4)" }}>{storeProducts.length} items</span>
+                        </h3>
+                        
+                        <div ref={gridRef} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "24px" }}>
+                            {storeProducts.length > 0 ? (
+                                storeProducts.map(p => <ProductCard key={p.id} product={p} staggerMode />)
+                            ) : (
+                                <p style={{ color: "rgba(0,0,0,0.5)", gridColumn: "1/-1" }}>No products published yet.</p>
+                            )}
                         </div>
                     </div>
                 </div>
-            )}
-
-            {/* Products */}
-            <div className="max-w-[980px] mx-auto px-5 py-12 mb-16">
-                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "21px", fontWeight: 600, color: "#1d1d1f", marginBottom: "24px" }}>
-                    All Products
-                </h2>
-                {inStock.length === 0 ? (
-                    <div className="flex items-center justify-center" style={{ backgroundColor: "#f5f5f7", borderRadius: "12px", height: "200px" }}>
-                        <p style={{ color: "rgba(0,0,0,0.4)" }}>No products available right now.</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {inStock.map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
-                    </div>
-                )}
             </div>
         </div>
     )

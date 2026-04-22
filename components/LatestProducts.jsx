@@ -4,8 +4,30 @@ import { useSelector } from 'react-redux'
 import Link from 'next/link'
 import Image from 'next/image'
 import { StarIcon, ArrowRightIcon, SparklesIcon } from 'lucide-react'
+import { useRef, useLayoutEffect } from 'react'
+import { gsap } from '@/lib/gsap'
+import { fadeUp, staggerCards } from '@/hooks/useScrollAnimation'
 
-// Dark featured card — spans 2 columns, dark glassmorphism
+function DarkFeaturedSkeleton() {
+    return (
+        <div className="skeleton-dark" style={{
+            gridColumn: "span 2", borderRadius: "20px", display: "flex", flexDirection: "column",
+            justifyContent: "space-between", minHeight: "280px", position: "relative",
+            overflow: "hidden", padding: "40px"
+        }}>
+            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "20px", height: "100%" }}>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "16px", marginTop: "auto" }}>
+                    <div style={{ width: "120px", height: "24px", borderRadius: "980px", backgroundColor: "rgba(255,255,255,0.05)" }} />
+                    <div style={{ width: "70%", height: "24px", borderRadius: "6px", backgroundColor: "rgba(255,255,255,0.05)" }} />
+                    <div style={{ width: "90%", height: "14px", borderRadius: "6px", backgroundColor: "rgba(255,255,255,0.05)" }} />
+                    <div style={{ width: "80%", height: "14px", borderRadius: "6px", backgroundColor: "rgba(255,255,255,0.05)" }} />
+                </div>
+                <div style={{ width: "160px", height: "180px", flexShrink: 0, backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "14px" }} />
+            </div>
+        </div>
+    )
+}
+
 function DarkFeaturedCard({ product }) {
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$'
     const avgRating = product.rating?.length > 0
@@ -15,7 +37,7 @@ function DarkFeaturedCard({ product }) {
         ? Math.round(((product.mrp - product.price) / product.mrp) * 100) : null
 
     return (
-        <Link href={`/product/${product.id}`} style={{ textDecoration: "none", display: "block", gridColumn: "span 2" }}>
+        <Link href={`/product/${product.id}`} className="latest-product-el" style={{ textDecoration: "none", display: "block", gridColumn: "span 2" }}>
             <div style={{
                 background: "linear-gradient(135deg, #0d1526 0%, #0a0d1a 60%, #1a0d26 100%)",
                 borderRadius: "20px",
@@ -78,7 +100,7 @@ function DarkFeaturedCard({ product }) {
 
                     {/* Image */}
                     <div style={{ width: "160px", height: "180px", flexShrink: 0, position: "relative" }}>
-                        <Image src={product.images[0]} alt={product.name} fill sizes="160px"
+                        <Image src={product.images[0]} alt={product.name} fill sizes="160px" loading="lazy"
                             style={{ objectFit: "contain", filter: "drop-shadow(0 12px 40px rgba(0,113,227,0.4))" }} />
                     </div>
                 </div>
@@ -89,6 +111,8 @@ function DarkFeaturedCard({ product }) {
 
 const LatestProducts = () => {
     const { list: products, loading } = useSelector((state) => state.product)
+    const sectionRef = useRef(null)
+    const headerRef = useRef(null)
 
     const sorted = [...products]
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -97,11 +121,21 @@ const LatestProducts = () => {
     const featured = sorted[0]
     const rest     = sorted.slice(1, 7)
 
+    useLayoutEffect(() => {
+        if (!loading && sorted.length > 0 && sectionRef.current) {
+            const ctx = gsap.context(() => {
+                fadeUp(headerRef, { y: 30 })
+                staggerCards('.latest-product-el', sectionRef)
+            }, sectionRef)
+            return () => ctx.revert()
+        }
+    }, [loading, sorted.length])
+
     return (
-        <section style={{ backgroundColor: "#000", paddingBottom: "4px" }}>
+        <section ref={sectionRef} style={{ backgroundColor: "#000", paddingBottom: "4px" }}>
             <div style={{ maxWidth: "980px", margin: "0 auto", padding: "80px 20px" }}>
                 {/* Header */}
-                <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "20px", marginBottom: "48px" }}>
+                <div ref={headerRef} style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "20px", marginBottom: "48px", opacity: 0 }}>
                     <div>
                         <p style={{ fontSize: "11px", fontWeight: 700, color: "#0071e3", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "8px" }}>New Arrivals</p>
                         <h2 style={{ fontFamily: "'Inter',sans-serif", fontSize: "clamp(1.75rem,3vw,2.5rem)", fontWeight: 800, color: "#fff", lineHeight: 1.05, letterSpacing: "-0.5px" }}>
@@ -111,20 +145,26 @@ const LatestProducts = () => {
                             {loading ? "Loading…" : `${sorted.length} fresh arrivals`}
                         </p>
                     </div>
-                    <Link href="/shop" style={{ fontSize: "13px", color: "#2997ff", textDecoration: "none", whiteSpace: "nowrap", border: "1px solid rgba(41,151,255,0.4)", borderRadius: "980px", padding: "7px 18px" }}>
+                    <Link href="/shop" style={{ fontSize: "13px", color: "#2997ff", textDecoration: "none", whiteSpace: "nowrap", border: "1px solid rgba(41,151,255,0.4)", borderRadius: "980px", padding: "7px 18px", transition: "background-color 0.2s" }} onMouseEnter={e => e.currentTarget.style.backgroundColor = "rgba(41,151,255,0.1)"} onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}>
                         See all ›
                     </Link>
                 </div>
 
                 {loading ? (
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "20px" }}>
-                        {Array(8).fill(null).map((_, i) => (
-                            <div key={i} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
+                            <DarkFeaturedSkeleton />
+                            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
                                 <div className="skeleton-dark" style={{ aspectRatio: "1/1", borderRadius: "14px" }} />
                                 <div className="skeleton-dark" style={{ height: "14px", width: "70%", borderRadius: "5px" }} />
                                 <div className="skeleton-dark" style={{ height: "12px", width: "40%", borderRadius: "5px" }} />
                             </div>
-                        ))}
+                            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                                <div className="skeleton-dark" style={{ aspectRatio: "1/1", borderRadius: "14px" }} />
+                                <div className="skeleton-dark" style={{ height: "14px", width: "70%", borderRadius: "5px" }} />
+                                <div className="skeleton-dark" style={{ height: "12px", width: "40%", borderRadius: "5px" }} />
+                            </div>
+                        </div>
                     </div>
                 ) : sorted.length === 0 ? (
                     <div style={{ textAlign: "center", padding: "60px 0" }}>
@@ -137,13 +177,16 @@ const LatestProducts = () => {
                         {featured && (
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "16px" }}>
                                 <DarkFeaturedCard product={featured} />
-                                {rest.slice(0, 2).map((p) => <ProductCard key={p.id} product={p} dark />)}
+                                <div className="latest-product-el"><ProductCard product={rest[0]} dark /></div>
+                                <div className="latest-product-el"><ProductCard product={rest[1]} dark /></div>
                             </div>
                         )}
                         {/* Remaining */}
                         {rest.length > 2 && (
                             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "16px" }}>
-                                {rest.slice(2).map((p) => <ProductCard key={p.id} product={p} dark />)}
+                                {rest.slice(2).map((p) => (
+                                    <div key={p.id} className="latest-product-el"><ProductCard product={p} dark /></div>
+                                ))}
                             </div>
                         )}
                     </>
