@@ -1,3 +1,4 @@
+'use client'
 import { useEffect, useState, useRef, useLayoutEffect } from "react"
 import Loading from "@/components/Loading"
 import { StarIcon, PackageIcon, ShoppingCartIcon, TrendingUpIcon } from "lucide-react"
