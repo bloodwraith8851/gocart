@@ -123,8 +123,8 @@ const BestSelling = () => {
     useLayoutEffect(() => {
         if (!loading && sorted.length > 0 && sectionRef.current) {
             const ctx = gsap.context(() => {
-                fadeUp(headerRef, { y: 30 })
-                staggerCards('.bestselling-product-el', sectionRef)
+                if (headerRef.current) fadeUp(headerRef.current, { y: 30 })
+                staggerCards('.bestselling-product-el')
             }, sectionRef)
             return () => ctx.revert()
         }
